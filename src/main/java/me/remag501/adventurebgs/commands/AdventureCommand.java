@@ -19,6 +19,19 @@ public class AdventureCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // Handle /adventure reload
+        if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("adventure.admin")) {
+                sender.sendMessage("You do not have permission to use this command.");
+                return true;
+            }
+
+            plugin.reloadPluginConfig();
+            sender.sendMessage("Adventure plugin configuration reloaded.");
+            return true;
+        }
+
+        // Teleport player to current adventure world
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can use this command.");
             return true;
@@ -41,5 +54,6 @@ public class AdventureCommand implements CommandExecutor {
 
         return true;
     }
+
 }
 
