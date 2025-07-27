@@ -7,7 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-public class AdventurePlugin extends JavaPlugin {
+public class AdventureBGS extends JavaPlugin {
 
     private RotationManager rotationManager;
 
