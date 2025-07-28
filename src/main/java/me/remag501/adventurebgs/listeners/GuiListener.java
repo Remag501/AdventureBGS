@@ -2,6 +2,7 @@ package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,7 +29,7 @@ public class GuiListener implements Listener {
 
         AdventureBGS plugin = (AdventureBGS) Bukkit.getPluginManager().getPlugin("AdventureBGS");
 
-        if (event.getSlot() == 4) {
+        if (event.getCurrentItem().getType() == Material.PLAYER_HEAD) {
             // Teleport with BetterRTP
             String currentWorld = plugin.getRotationManager().getCurrentWorldName();
             Bukkit.dispatchCommand(player, "rtp world " + currentWorld);

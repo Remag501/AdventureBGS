@@ -9,7 +9,6 @@ public class MessageUtil {
     }
 
     public static String format(String message, String currentMap, String nextMap, long minutes) {
-        Bukkit.getPluginManager().getPlugin("AdventureBGS").getLogger().info("hello");
         return color(message
                 .replace("%current_map%", currentMap)
                 .replace("%new_map%", nextMap)

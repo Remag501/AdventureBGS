@@ -13,7 +13,6 @@ import org.bukkit.World;
 public class AdventureBGS extends JavaPlugin {
 
     private RotationManager rotationManager;
-    private TimeManager timeManager;
     private GuiManager guiManager;
     private ExtractionManager extractionManager;
     private PenaltyManager penaltyManager;
@@ -24,9 +23,9 @@ public class AdventureBGS extends JavaPlugin {
 
         // Initialize managers
         rotationManager = new RotationManager(this);
-        timeManager = new TimeManager(this);
         guiManager = new GuiManager(this);
         extractionManager = new ExtractionManager(this);
+        penaltyManager = new PenaltyManager(this);
 
         // Preload all configured worlds
         preloadWorlds();
@@ -64,10 +63,10 @@ public class AdventureBGS extends JavaPlugin {
 
     public void reloadPluginConfig() {
         reloadConfig(); // Reloads config.yml
-        rotationManager = new RotationManager(this); // Reinitialize with new data
+        rotationManager = new RotationManager(this); // Reinitialize with new data (might be not needed)?
         extractionManager = new ExtractionManager(this);
-        timeManager = new TimeManager(this);
         guiManager = new GuiManager(this);
+//        penaltyManager = new PenaltyManager(this); // Seems to work without being re init
     }
 
     public PenaltyManager getPenaltyManager() {
