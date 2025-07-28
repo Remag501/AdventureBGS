@@ -28,7 +28,7 @@ public class GuiManager {
         // Time remaining until next rotation
         long minutesLeft = plugin.getRotationManager().getMinutesUntilNextCycle();
 
-        Inventory gui = Bukkit.createInventory(null, 9, "Adventure Worlds");
+        Inventory gui = Bukkit.createInventory(null, 36, "Battleground Maps");
 
         // Teleport block
         WorldInfo currentInfo = plugin.getRotationManager().getCurrentWorld();
@@ -36,7 +36,7 @@ public class GuiManager {
         ItemMeta tpMeta = teleportItem.getItemMeta();
         tpMeta.setDisplayName(ChatColor.GREEN + "Enter: " + currentInfo.getName());
         teleportItem.setItemMeta(tpMeta);
-        gui.setItem(4, teleportItem);
+        gui.setItem(13, teleportItem);
 
         // Clock with lore
         ItemStack clockItem = new ItemStack(Material.CLOCK);
@@ -47,7 +47,7 @@ public class GuiManager {
                 ChatColor.GRAY + "Next map: " + nextWorld
         ));
         clockItem.setItemMeta(clockMeta);
-        gui.setItem(5, clockItem);
+        gui.setItem(22, clockItem);
 
         player.openInventory(gui);
     }
