@@ -1,31 +1,46 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.WorldInfo;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RotationManager {
 
     private final AdventureBGS plugin;
-    private final List<String> worlds;
+//    private final List<String> worlds;
+    private  final List<WorldInfo> worlds;
     private final int cycleMinutes;
     private final Instant startCycle;
 
     public RotationManager(AdventureBGS plugin) {
         this.plugin = plugin;
         FileConfiguration config = plugin.getConfig();
-
         this.cycleMinutes = config.getInt("rotation.cycle-minutes");
-        this.worlds = config.getStringList("rotation.worlds");
+        // Parse rotations.worlds
+        List<Map<?, ?>> worldList = config.getMapList("rotation.worlds");
+        this.worlds = worldList.stream()
+                .map(map -> new WorldInfo(
+                        (String) map.get("name"),
+                        (String) map.get("texture")
+                ))
+                .toList();
         String startCycleStr = config.getString("rotation.start-cycle");
         this.startCycle = Instant.parse(startCycleStr);
     }
 
     public List<String> getWorlds() {
-        return worlds;
+        List<String> rv = new ArrayList<>();
+        for (WorldInfo worldInfo: worlds) {
+            rv.add(worldInfo.getName());
+        }
+        return rv;
     }
 
     public int getCurrentWorldIndex() {
@@ -36,7 +51,7 @@ public class RotationManager {
     }
 
     public String getNextWorldName() {
-        return worlds.get((getCurrentWorldIndex() + 1) % worlds.size());
+        return worlds.get((getCurrentWorldIndex() + 1) % worlds.size()).getName();
     }
 
     public long getMinutesUntilNextCycle() {
@@ -48,7 +63,15 @@ public class RotationManager {
 
 
     public String getCurrentWorldName() {
+        return worlds.get(getCurrentWorldIndex()).getName();
+    }
+
+    public WorldInfo getCurrentWorld() {
         return worlds.get(getCurrentWorldIndex());
+    }
+
+    public WorldInfo getNextWorld() {
+        return worlds.get((getCurrentWorldIndex() + 1) % worlds.size());
     }
 }
 

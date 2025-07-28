@@ -1,6 +1,8 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.WorldInfo;
+import me.remag501.adventurebgs.util.SkullUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -29,9 +31,10 @@ public class GuiManager {
         Inventory gui = Bukkit.createInventory(null, 9, "Adventure Worlds");
 
         // Teleport block
-        ItemStack teleportItem = new ItemStack(Material.PLAYER_HEAD);
+        WorldInfo currentInfo = plugin.getRotationManager().getCurrentWorld();
+        ItemStack teleportItem = SkullUtil.fromTexture(currentInfo.getTexture());
         ItemMeta tpMeta = teleportItem.getItemMeta();
-        tpMeta.setDisplayName(ChatColor.GREEN + "Enter: " + currentWorld);
+        tpMeta.setDisplayName(ChatColor.GREEN + "Enter: " + currentInfo.getName());
         teleportItem.setItemMeta(tpMeta);
         gui.setItem(4, teleportItem);
 

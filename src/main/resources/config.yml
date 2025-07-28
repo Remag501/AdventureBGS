@@ -2,6 +2,9 @@ rotation:
   cycle-minutes: 30
   start-cycle: "2025-07-27T00:00:00Z" # UTC ISO-8601 timestamp
   worlds:
-    - "adventure_world_1"
-    - "adventure_world_2"
-    - "adventure_world_3"
+    - name: "adventure_world_1"
+      texture: "http://textures.minecraft.net/texture/abc123..."
+    - name: "adventure_world_2"
+      texture: "http://textures.minecraft.net/texture/def456..."
+    - name: "adventure_world_3"
+      texture: "http://textures.minecraft.net/texture/ghi789..."
