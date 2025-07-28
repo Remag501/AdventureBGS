@@ -3,6 +3,7 @@ package me.remag501.adventurebgs;
 import me.remag501.adventurebgs.commands.AdventureCommand;
 import me.remag501.adventurebgs.listeners.GuiListener;
 import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.managers.TimeManager;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,6 +13,7 @@ import org.bukkit.World;
 public class AdventureBGS extends JavaPlugin {
 
     private RotationManager rotationManager;
+    private TimeManager timeManager;
 
     @Override
     public void onEnable() {
@@ -30,7 +32,8 @@ public class AdventureBGS extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
         // Start broadcasting messages
-        startBroadcastTask();
+        timeManager = new TimeManager(this);
+        timeManager.startBroadcastTask();
     }
 
     @Override
@@ -58,27 +61,6 @@ public class AdventureBGS extends JavaPlugin {
         rotationManager = new RotationManager(this); // Reinitialize with new data
     }
 
-    private void startBroadcastTask() {
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
-            RotationManager rotation = getRotationManager();
 
-            long minutesLeft = rotation.getMinutesUntilNextCycle();
-            String currentMap = rotation.getCurrentWorld().getName();
-            String nextMap = rotation.getNextWorld().getName();
 
-            // Warning
-            long warnMinutes = getConfig().getLong("broadcast.warn-minutes");
-            if (minutesLeft == warnMinutes) {
-                String msg = getConfig().getString("broadcast.warn-message");
-                Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
-            }
-
-            // New map event (detect cycle boundary)
-            if (rotation.isNewCycle()) {
-                String msg = getConfig().getString("broadcast.new-map-message");
-                Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
-            }
-
-        }, 20L, 20L); // Run every second
-    }
 }
