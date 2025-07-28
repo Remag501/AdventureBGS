@@ -2,6 +2,7 @@ package me.remag501.adventurebgs;
 
 import me.remag501.adventurebgs.commands.AdventureCommand;
 import me.remag501.adventurebgs.listeners.GuiListener;
+import me.remag501.adventurebgs.managers.GuiManager;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.managers.TimeManager;
 import me.remag501.adventurebgs.util.MessageUtil;
@@ -14,13 +15,16 @@ public class AdventureBGS extends JavaPlugin {
 
     private RotationManager rotationManager;
     private TimeManager timeManager;
+    private GuiManager guiManager;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
 
-        // Initialize rotation manager
+        // Initialize managers
         rotationManager = new RotationManager(this);
+        timeManager = new TimeManager(this);
+        guiManager = new GuiManager(this);
 
         // Preload all configured worlds
         preloadWorlds();
@@ -32,7 +36,6 @@ public class AdventureBGS extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
         // Start broadcasting messages
-        timeManager = new TimeManager(this);
         timeManager.startBroadcastTask();
     }
 
@@ -61,6 +64,7 @@ public class AdventureBGS extends JavaPlugin {
         rotationManager = new RotationManager(this); // Reinitialize with new data
     }
 
-
-
+    public GuiManager getGuiManager() {
+        return guiManager;
+    }
 }

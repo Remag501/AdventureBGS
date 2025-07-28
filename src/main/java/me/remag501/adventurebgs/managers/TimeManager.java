@@ -46,9 +46,6 @@ public class TimeManager {
         String penaltyMsg = plugin.getConfig().getString("penalty.message");
         String soundName = plugin.getConfig().getString("penalty.sound");
 
-        String effectType = plugin.getConfig().getString("penalty.effect.type");
-        int amplifier = plugin.getConfig().getInt("penalty.effect.amplifier", 1);
-
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!player.getWorld().getName().equals(closedWorldName)) continue;
 
@@ -65,9 +62,18 @@ public class TimeManager {
 
             // Apply Wither
             player.addPotionEffect(new PotionEffect(
-                    PotionEffectType.getByName(effectType),
+                    PotionEffectType.WITHER,
                     Integer.MAX_VALUE, // Permanent
-                    amplifier,
+                    3,
+                    false,
+                    false,
+                    true
+            ));
+            // Apply Blindness
+            player.addPotionEffect(new PotionEffect(
+                    PotionEffectType.BLINDNESS,
+                    Integer.MAX_VALUE, // Permanent
+                    1,
                     false,
                     false,
                     true
