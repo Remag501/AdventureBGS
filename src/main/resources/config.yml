@@ -38,3 +38,6 @@ extraction:
     adventure_world_2:
       - min: [100, 64, 100]
         max: [110, 70, 110]
+
+gui:
+  name: "Adventure Maps"

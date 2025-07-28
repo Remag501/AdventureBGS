@@ -1,4 +1,4 @@
-package me.remag501.adventurebgs;
+package me.remag501.adventurebgs.model;
 
 import org.bukkit.Location;
 

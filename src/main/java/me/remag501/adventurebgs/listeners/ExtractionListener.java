@@ -1,7 +1,7 @@
 package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.ExtractionState;
+import me.remag501.adventurebgs.model.ExtractionState;
 import me.remag501.adventurebgs.managers.ExtractionManager;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
@@ -28,9 +28,9 @@ public class ExtractionListener implements Listener {
     private final Map<UUID, ExtractionState> activeExtractions = new HashMap<>();
     private final int extractionDuration;
 
-    public ExtractionListener(AdventureBGS plugin, ExtractionManager manager) {
+    public ExtractionListener(AdventureBGS plugin) {
         this.plugin = plugin;
-        this.manager = manager;
+        this.manager = plugin.getExtractionManager();
         this.extractionDuration = plugin.getConfig().getInt("extraction.duration");
     }
 

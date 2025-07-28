@@ -1,4 +1,4 @@
-package me.remag501.adventurebgs;
+package me.remag501.adventurebgs.model;
 
 public class WorldInfo {
     private final String name;

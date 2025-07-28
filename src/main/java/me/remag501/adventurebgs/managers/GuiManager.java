@@ -1,7 +1,7 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.WorldInfo;
+import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.SkullUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,7 +28,8 @@ public class GuiManager {
         // Time remaining until next rotation
         long minutesLeft = plugin.getRotationManager().getMinutesUntilNextCycle();
 
-        Inventory gui = Bukkit.createInventory(null, 36, "Battleground Maps");
+        String guiTitle = plugin.getConfig().getString("gui.title");
+        Inventory gui = Bukkit.createInventory(null, 36, guiTitle);
 
         // Teleport block
         WorldInfo currentInfo = plugin.getRotationManager().getCurrentWorld();

@@ -16,6 +16,7 @@ public class AdventureBGS extends JavaPlugin {
     private TimeManager timeManager;
     private GuiManager guiManager;
     private ExtractionManager extractionManager;
+    private PenaltyManager penaltyManager;
 
     @Override
     public void onEnable() {
@@ -34,11 +35,11 @@ public class AdventureBGS extends JavaPlugin {
         getCommand("adventure").setExecutor(new AdventureCommand(this));
 
         // Register Listener
-        getServer().getPluginManager().registerEvents(new GuiListener(), this);
-        getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager), this);
+        getServer().getPluginManager().registerEvents(new GuiListener(this), this);
+        getServer().getPluginManager().registerEvents(new ExtractionListener(this), this);
 
         // Start broadcasting messages
-        timeManager.startBroadcastTask();
+        penaltyManager.startBroadcastTask();
     }
 
     @Override
@@ -65,8 +66,16 @@ public class AdventureBGS extends JavaPlugin {
         reloadConfig(); // Reloads config.yml
         rotationManager = new RotationManager(this); // Reinitialize with new data
         extractionManager = new ExtractionManager(this);
-//        timeManager. loads dynamically
-        // GUI manager has no data from config
+        timeManager = new TimeManager(this);
+        guiManager = new GuiManager(this);
+    }
+
+    public PenaltyManager getPenaltyManager() {
+        return penaltyManager;
+    }
+
+    public ExtractionManager getExtractionManager() {
+        return extractionManager;
     }
 
     public GuiManager getGuiManager() {

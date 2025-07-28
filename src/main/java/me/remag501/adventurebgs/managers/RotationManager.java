@@ -1,8 +1,7 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.WorldInfo;
-import org.bukkit.World;
+import me.remag501.adventurebgs.model.WorldInfo;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.time.Duration;

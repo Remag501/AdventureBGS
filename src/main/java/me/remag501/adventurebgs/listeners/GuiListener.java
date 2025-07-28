@@ -10,11 +10,17 @@ import org.bukkit.plugin.Plugin;
 
 public class GuiListener implements Listener {
 
+    private AdventureBGS plugin;
+
+    public GuiListener(AdventureBGS plugin) {
+        this.plugin = plugin;
+    }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        if (!event.getView().getTitle().equals("Adventure Worlds")) return;
+        String guiTitle = plugin.getConfig().getString("gui.title");
+        if (!event.getView().getTitle().equals(guiTitle)) return;
 
         event.setCancelled(true); // Prevent taking items
 
