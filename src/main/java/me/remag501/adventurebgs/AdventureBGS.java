@@ -1,10 +1,9 @@
 package me.remag501.adventurebgs;
 
 import me.remag501.adventurebgs.commands.AdventureCommand;
+import me.remag501.adventurebgs.listeners.ExtractionListener;
 import me.remag501.adventurebgs.listeners.GuiListener;
-import me.remag501.adventurebgs.managers.GuiManager;
-import me.remag501.adventurebgs.managers.RotationManager;
-import me.remag501.adventurebgs.managers.TimeManager;
+import me.remag501.adventurebgs.managers.*;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,6 +15,7 @@ public class AdventureBGS extends JavaPlugin {
     private RotationManager rotationManager;
     private TimeManager timeManager;
     private GuiManager guiManager;
+    private ExtractionManager extractionManager;
 
     @Override
     public void onEnable() {
@@ -25,6 +25,7 @@ public class AdventureBGS extends JavaPlugin {
         rotationManager = new RotationManager(this);
         timeManager = new TimeManager(this);
         guiManager = new GuiManager(this);
+        extractionManager = new ExtractionManager(this);
 
         // Preload all configured worlds
         preloadWorlds();
@@ -34,6 +35,7 @@ public class AdventureBGS extends JavaPlugin {
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
+        getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager), this);
 
         // Start broadcasting messages
         timeManager.startBroadcastTask();
@@ -62,6 +64,9 @@ public class AdventureBGS extends JavaPlugin {
     public void reloadPluginConfig() {
         reloadConfig(); // Reloads config.yml
         rotationManager = new RotationManager(this); // Reinitialize with new data
+        extractionManager = new ExtractionManager(this);
+//        timeManager. loads dynamically
+        // GUI manager has no data from config
     }
 
     public GuiManager getGuiManager() {

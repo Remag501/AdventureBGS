@@ -17,7 +17,24 @@ broadcast:
 penalty:
   message: "&cThe map has collapsed! You are consumed by darkness..."
   sound: "ENTITY_WITHER_SPAWN" # Any Bukkit sound name
-  effect:
-    type: "WITHER"
-    duration: -1      # -1 = infinite until manually cleared
-    amplifier: 1
+
+extraction:
+  duration: 5 # seconds to stand in zone
+  spawn:
+    world: "spawn"
+    x: 0
+    y: 64
+    z: 0
+  message:
+    start: "&aExtraction initiated! Hold still for %seconds% seconds..."
+    success: "&aExtraction complete! Teleporting..."
+    cancel: "&cYou left the extraction zone!"
+  zones:
+    adventure_world_1:
+      - min: [0, 64, 0]
+        max: [10, 70, 10]
+      - min: [20, 64, 20]
+        max: [30, 70, 30]
+    adventure_world_2:
+      - min: [100, 64, 100]
+        max: [110, 70, 110]
