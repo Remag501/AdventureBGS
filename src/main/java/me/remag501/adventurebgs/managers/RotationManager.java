@@ -56,11 +56,21 @@ public class RotationManager {
 
     public long getMinutesUntilNextCycle() {
         Instant now = Instant.now();
-        long minutesSinceStart = Duration.between(startCycle, now).toMinutes();
-        long nextCycleMinutes = ((minutesSinceStart / cycleMinutes) + 1) * cycleMinutes;
-        return nextCycleMinutes - minutesSinceStart;
+        long secondsSinceStart = Duration.between(startCycle, now).getSeconds();
+        long cycleSeconds = cycleMinutes * 60L;
+
+        long secondsIntoCycle = secondsSinceStart % cycleSeconds;
+        long secondsLeft = cycleSeconds - secondsIntoCycle;
+
+        return secondsLeft / 60; // floor to minutes
     }
 
+    public boolean isNewCycle() {
+        Instant now = Instant.now();
+        long secondsSinceStart = Duration.between(startCycle, now).getSeconds();
+        long cycleSeconds = cycleMinutes * 60L;
+        return (secondsSinceStart % cycleSeconds) == 0; // exactly at boundary
+    }
 
     public String getCurrentWorldName() {
         return worlds.get(getCurrentWorldIndex()).getName();

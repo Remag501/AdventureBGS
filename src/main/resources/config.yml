@@ -8,3 +8,8 @@ rotation:
       texture: "http://textures.minecraft.net/texture/def456..."
     - name: "adventure_world_3"
       texture: "http://textures.minecraft.net/texture/ghi789..."
+
+broadcast:
+  warn-minutes: 5 # Broadcast this many minutes before rotation
+  warn-message: "&e[Adventure] Map &a%current_map% &ecloses in &c%minutes% &eminutes!"
+  new-map-message: "&a[Adventure] New map is now open: &b%new_map%!"
