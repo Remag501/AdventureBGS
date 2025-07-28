@@ -31,29 +31,25 @@ public class AdventureCommand implements CommandExecutor {
             return true;
         }
 
-        // Teleport player to current adventure world
+        // Teleport player via BetterRTP
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can use this command.");
             return true;
         }
 
         String currentWorldName = plugin.getRotationManager().getCurrentWorldName();
-        World world = Bukkit.getWorld(currentWorldName);
 
-        if (world == null) {
-            player.sendMessage("Adventure world is not loaded: " + currentWorldName);
+        // Check if BetterRTP is installed
+        if (Bukkit.getPluginManager().getPlugin("BetterRTP") == null) {
+            player.sendMessage("BetterRTP is not installed on this server!");
             return true;
         }
 
-        double x = plugin.getConfig().getDouble("spawn.x");
-        double y = plugin.getConfig().getDouble("spawn.y");
-        double z = plugin.getConfig().getDouble("spawn.z");
-
-        player.teleport(new Location(world, x, y, z));
-        player.sendMessage("Teleported to adventure world: " + currentWorldName);
-
+        // Execute RTP command (no spawn coords needed)
+        Bukkit.dispatchCommand(player, "rtp world " + currentWorldName);
         return true;
     }
+
 
 }
 

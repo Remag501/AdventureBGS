@@ -5,8 +5,3 @@ rotation:
     - "adventure_world_1"
     - "adventure_world_2"
     - "adventure_world_3"
-
-spawn:
-  x: 0
-  y: 100
-  z: 0
