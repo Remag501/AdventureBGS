@@ -35,6 +35,18 @@ public class RotationManager {
         return (int) (cycleNumber % worlds.size());
     }
 
+    public String getNextWorldName() {
+        return worlds.get((getCurrentWorldIndex() + 1) % worlds.size());
+    }
+
+    public long getMinutesUntilNextCycle() {
+        Instant now = Instant.now();
+        long minutesSinceStart = Duration.between(startCycle, now).toMinutes();
+        long nextCycleMinutes = ((minutesSinceStart / cycleMinutes) + 1) * cycleMinutes;
+        return nextCycleMinutes - minutesSinceStart;
+    }
+
+
     public String getCurrentWorldName() {
         return worlds.get(getCurrentWorldIndex());
     }

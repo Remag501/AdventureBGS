@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs;
 
 import me.remag501.adventurebgs.commands.AdventureCommand;
+import me.remag501.adventurebgs.listeners.GuiListener;
 import me.remag501.adventurebgs.managers.RotationManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,6 +24,9 @@ public class AdventureBGS extends JavaPlugin {
 
         // Register commands
         getCommand("adventure").setExecutor(new AdventureCommand(this));
+
+        // Register Listener
+        getServer().getPluginManager().registerEvents(new GuiListener(), this);
     }
 
     @Override
