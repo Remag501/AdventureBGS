@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,8 +21,10 @@ public class GuiListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        String guiTitle = plugin.getConfig().getString("gui.title");
-        if (!event.getView().getTitle().equals(guiTitle)) return;
+        String guiTitle = MessageUtil.color(plugin.getConfig().getString("gui.title"));
+        String viewTitle = event.getView().getTitle();
+
+        if (!viewTitle.equals(guiTitle)) return;
 
         event.setCancelled(true); // Prevent taking items
 

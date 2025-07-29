@@ -8,8 +8,10 @@ import org.bukkit.Bukkit;
 public class BroadcastTask implements Runnable {
 
     private AdventureBGS plugin;
+    private boolean hasBroadcasted;
     public BroadcastTask (AdventureBGS plugin) {
         this.plugin = plugin;
+        hasBroadcasted = false;
     }
 
     @Override
@@ -22,9 +24,10 @@ public class BroadcastTask implements Runnable {
 
             // Warning
             long warnMinutes = plugin.getConfig().getLong("broadcast.warn-minutes");
-            if (minutesLeft == warnMinutes) {
+            if (minutesLeft == warnMinutes && !hasBroadcasted) {
                 String msg = plugin.getConfig().getString("broadcast.warn-message");
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
+                hasBroadcasted = true;
             }
 
             // New map event (detect cycle boundary)
@@ -33,6 +36,7 @@ public class BroadcastTask implements Runnable {
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
                 // Apply penalty
                 plugin.getPenaltyManager().applyPenalty(rotation.getCurrentWorld().getName());
+                hasBroadcasted = false; // Allow broadcast for next map
             }
     }
 

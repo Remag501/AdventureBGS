@@ -91,7 +91,7 @@ public class ExtractionListener implements Listener {
                 }
 
                 bossBar.setProgress((double) timeLeft / extractionDuration);
-                String updatedTitle = title.replace("%seconds%", String.valueOf(extractionDuration));
+                String updatedTitle = title.replace("%seconds%", String.valueOf(timeLeft));
                 bossBar.setTitle(updatedTitle);
                 timeLeft--;
             }
