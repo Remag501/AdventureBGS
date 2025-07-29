@@ -4,17 +4,17 @@ import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.model.ExtractionState;
 import me.remag501.adventurebgs.managers.ExtractionManager;
 import me.remag501.adventurebgs.util.MessageUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
@@ -63,8 +63,7 @@ public class ExtractionListener implements Listener {
         player.sendMessage(MessageUtil.color(plugin.getConfig().getString("extraction.message.start")
                 .replace("%seconds%", String.valueOf(extractionDuration))));
 
-        String title = MessageUtil.color(plugin.getConfig().getString("extraction.messages.title").
-                replace("%seconds%", String.valueOf(extractionDuration)));
+        String title = MessageUtil.color(plugin.getConfig().getString("extraction.message.title"));
 
         BossBar bossBar = Bukkit.createBossBar(
                 title,
@@ -75,6 +74,7 @@ public class ExtractionListener implements Listener {
 
         BukkitRunnable task = new BukkitRunnable() {
             int timeLeft = extractionDuration;
+            boolean alertTriggered = false;
 
             @Override
             public void run() {
@@ -83,11 +83,20 @@ public class ExtractionListener implements Listener {
                     return;
                 }
 
+                // Alert other players X seconds before completion
+                int alertSeconds = plugin.getConfig().getInt("extraction.alert-seconds", 3);
+                if (timeLeft == alertSeconds && !alertTriggered) {
+                    triggerAlert(player);
+                    alertTriggered = true;
+                }
+
                 bossBar.setProgress((double) timeLeft / extractionDuration);
-                bossBar.setTitle(ChatColor.YELLOW + "Extracting... " + timeLeft + "s");
+                String updatedTitle = title.replace("%seconds%", String.valueOf(extractionDuration));
+                bossBar.setTitle(updatedTitle);
                 timeLeft--;
             }
         };
+
 
         task.runTaskTimer(plugin, 0L, 20L);
         activeExtractions.put(player.getUniqueId(), new ExtractionState(task, bossBar));
@@ -117,5 +126,45 @@ public class ExtractionListener implements Listener {
             player.teleport(new Location(spawnWorld, x, y, z));
         }
     }
+
+    private void triggerAlert(Player extractingPlayer) {
+        boolean usePlayerLocation = plugin.getConfig().getBoolean("extraction.alert.location.use-player", true);
+        Location loc;
+
+        if (usePlayerLocation) {
+            loc = extractingPlayer.getLocation();
+        } else {
+            World world = Bukkit.getWorld(plugin.getConfig().getString("extraction.alert.location.world"));
+            double x = plugin.getConfig().getDouble("extraction.alert.location.x");
+            double y = plugin.getConfig().getDouble("extraction.alert.location.y");
+            double z = plugin.getConfig().getDouble("extraction.alert.location.z");
+            loc = new Location(world, x, y, z);
+        }
+
+        // Fireworks
+        if (plugin.getConfig().getBoolean("extraction.alert.fireworks", true)) {
+            Firework firework = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
+            FireworkMeta meta = firework.getFireworkMeta();
+            meta.addEffect(FireworkEffect.builder()
+                    .withColor(Color.RED)
+                    .with(FireworkEffect.Type.BALL_LARGE)
+                    .flicker(true)
+                    .trail(true)
+                    .build());
+            meta.setPower(1);
+            firework.setFireworkMeta(meta);
+        }
+
+        // Particles
+        if (plugin.getConfig().getBoolean("extraction.alert.particles", true)) {
+            loc.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, loc, 5, 1, 1, 1, 0.05);
+        }
+
+        // Sound
+        String soundName = plugin.getConfig().getString("extraction.alert.sound", "ENTITY_ENDER_DRAGON_GROWL");
+        Sound sound = Sound.valueOf(soundName);
+        loc.getWorld().playSound(loc, sound, 1.0f, 1.0f);
+    }
+
 }
 
