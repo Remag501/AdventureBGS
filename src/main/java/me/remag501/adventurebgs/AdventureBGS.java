@@ -63,9 +63,9 @@ public class AdventureBGS extends JavaPlugin {
 
     public void reloadPluginConfig() {
         reloadConfig(); // Reloads config.yml
-        rotationManager = new RotationManager(this); // Reinitialize with new data (might be not needed)?
-        extractionManager = new ExtractionManager(this);
-        guiManager = new GuiManager(this);
+//        rotationManager = new RotationManager(this); // Reinitialize with new data (might be not needed)?
+//        extractionManager = new ExtractionManager(this);
+//        guiManager = new GuiManager(this);
 //        penaltyManager = new PenaltyManager(this); // Seems to work without being re init
     }
 
