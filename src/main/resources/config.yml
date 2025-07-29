@@ -26,6 +26,7 @@ extraction:
     y: 64
     z: 0
   message:
+    title: "Extracting... %seconds%"
     start: "&aExtraction initiated! Hold still for %seconds% seconds..."
     success: "&aExtraction complete! Teleporting..."
     cancel: "&cYou left the extraction zone!"
@@ -40,4 +41,18 @@ extraction:
         max: [110, 70, 110]
 
 gui:
-  name: "Adventure Maps"
+  title: "&6Adventure Menu"
+
+  teleport:
+    slot: 13
+    name: "&aEnter: %current_world%"
+    lore:
+      - "&7Click to begin your adventure!"
+      - "&7You are entering: %current_world%"
+
+  info:
+    slot: 22
+    name: "&eCycle Info"
+    lore:
+      - "&7Closes in: %minutes_left% minutes"
+      - "&7Next map: %next_world%"

@@ -63,8 +63,11 @@ public class ExtractionListener implements Listener {
         player.sendMessage(MessageUtil.color(plugin.getConfig().getString("extraction.message.start")
                 .replace("%seconds%", String.valueOf(extractionDuration))));
 
+        String title = MessageUtil.color(plugin.getConfig().getString("extraction.messages.title").
+                replace("%seconds%", String.valueOf(extractionDuration)));
+
         BossBar bossBar = Bukkit.createBossBar(
-                ChatColor.YELLOW + "Extracting...",
+                title,
                 BarColor.GREEN,
                 BarStyle.SOLID
         );
