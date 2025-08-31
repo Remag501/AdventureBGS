@@ -29,7 +29,9 @@ public class RotationManager {
                         (String) map.get("id"),
                         (String) map.get("texture"),
                         (String) map.get("chat-name"),
-                        (String) map.get("gui-name")
+                        (String) map.get("gui-name"),
+                        (List<String>) map.get("lore"),
+                        (List<String>) map.get("commands")
                 ))
                 .toList();
         String startCycleStr = config.getString("rotation.start-cycle");

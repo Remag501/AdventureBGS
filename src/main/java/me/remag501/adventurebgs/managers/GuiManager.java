@@ -41,7 +41,7 @@ public class GuiManager {
         String tpName = plugin.getConfig().getString("gui.teleport.name")
                 .replace("%current_world%", currentWorld);
 
-        List<String> tpLore = plugin.getConfig().getStringList("gui.teleport.lore")
+        List<String> tpLore = plugin.getRotationManager().getCurrentWorld().getLore()
                 .stream()
                 .map(line -> line.replace("%current_world%", currentWorld))
                 .map(MessageUtil::color)

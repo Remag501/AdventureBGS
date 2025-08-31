@@ -62,11 +62,11 @@ public class AdventureBGS extends JavaPlugin {
     }
 
     public void reloadPluginConfig() {
-        reloadConfig(); // Reloads config.yml
-        rotationManager = new RotationManager(this); // Reinitialize with new data (needed for time)
-//        extractionManager = new ExtractionManager(this);
-//        guiManager = new GuiManager(this);
-//        penaltyManager = new PenaltyManager(this); // Seems to work without being re init
+        reloadConfig(); // Reloads config.yml for spigot
+        rotationManager = new RotationManager(this);
+        extractionManager = new ExtractionManager(this);
+//        guiManager = new GuiManager(this); // Empty constructor, no need for re init
+//        penaltyManager = new PenaltyManager(this); // No config in constructor, no need for re init
     }
 
     public PenaltyManager getPenaltyManager() {

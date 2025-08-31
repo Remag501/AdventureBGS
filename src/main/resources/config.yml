@@ -2,18 +2,33 @@ rotation:
   cycle-minutes: 30
   start-cycle: "2025-07-27T00:00:00Z" # UTC ISO-8601 timestamp
   worlds:
-    - id: "adventure_world_1"
+    - id: "sahara"
       texture: "http://textures.minecraft.net/texture/abc123..."
       chat-name: "&cFirst Adventure World"
-      gui-name: "&6Enter Adventure World 1"
-    - name: "adventure_world_2"
+      gui-name: "&6Adventure World 1"
+      lore:
+        - "&6This is the first adventure world!"
+        - "&6Add lore here"
+      commands:
+        - "say world 1"
+    - id: "sahara"
       texture: "http://textures.minecraft.net/texture/def456..."
-      chat-name: "&Second Adventure World"
-      gui-name: "&6Enter Adventure World 2"
-    - name: "adventure_world_3"
+      chat-name: "&cSecond Adventure World"
+      gui-name: "&6Adventure World 2"
+      lore:
+        - "&6This is the second adventure world!"
+        - "&6Add lore here"
+      commands:
+        - "say world 2"
+    - id: "sahara"
       texture: "http://textures.minecraft.net/texture/ghi789..."
-      chat-name: "&Third Adventure World"
-      gui-name: "&6Enter Adventure World 3"
+      chat-name: "&cThird Adventure World"
+      gui-name: "&6Adventure World 3"
+      lore:
+        - "&6This is the third adventure world!"
+        - "&6Add lore here"
+      commands:
+        - "say world 3"
 
 broadcast:
   warn-minutes: 5 # Broadcast this many minutes before rotation

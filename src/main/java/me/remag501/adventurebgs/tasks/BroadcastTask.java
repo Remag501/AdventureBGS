@@ -5,6 +5,8 @@ import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
 
+import java.util.List;
+
 public class BroadcastTask implements Runnable {
 
     private AdventureBGS plugin;
@@ -27,6 +29,12 @@ public class BroadcastTask implements Runnable {
             if (minutesLeft == warnMinutes && !hasBroadcasted) {
                 String msg = plugin.getConfig().getString("broadcast.warn-message");
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
+                // Run through all world commands
+                List<String> commands = rotation.getNextWorld().getCommands();
+                for (String command: commands) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                }
+
                 hasBroadcasted = true;
             }
 
