@@ -19,8 +19,8 @@ public class BroadcastTask implements Runnable {
             RotationManager rotation = plugin.getRotationManager();
 
             long minutesLeft = rotation.getMinutesUntilNextCycle();
-            String currentMap = rotation.getCurrentWorld().getName();
-            String nextMap = rotation.getNextWorld().getName();
+            String currentMap = rotation.getCurrentWorld().getChatName();
+            String nextMap = rotation.getNextWorld().getChatName();
 
             // Warning
             long warnMinutes = plugin.getConfig().getLong("broadcast.warn-minutes");
@@ -35,7 +35,7 @@ public class BroadcastTask implements Runnable {
                 String msg = plugin.getConfig().getString("broadcast.new-map-message");
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
                 // Apply penalty
-                plugin.getPenaltyManager().applyPenalty(rotation.getCurrentWorld().getName());
+                plugin.getPenaltyManager().applyPenalty(rotation.getCurrentWorld().getId());
                 hasBroadcasted = false; // Allow broadcast for next map
             }
     }

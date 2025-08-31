@@ -25,8 +25,8 @@ public class GuiManager {
     }
 
     public void openAdventureGUI(Player player) {
-        String currentWorld = plugin.getRotationManager().getCurrentWorldName();
-        String nextWorld = plugin.getRotationManager().getNextWorldName();
+        String currentWorld = plugin.getRotationManager().getCurrentWorld().getGuiName();
+        String nextWorld = plugin.getRotationManager().getNextWorld().getGuiName();
         long minutesLeft = plugin.getRotationManager().getMinutesUntilNextCycle();
 
         // GUI Title

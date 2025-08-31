@@ -26,8 +26,10 @@ public class RotationManager {
         List<Map<?, ?>> worldList = config.getMapList("rotation.worlds");
         this.worlds = worldList.stream()
                 .map(map -> new WorldInfo(
-                        (String) map.get("name"),
-                        (String) map.get("texture")
+                        (String) map.get("id"),
+                        (String) map.get("texture"),
+                        (String) map.get("chat-name"),
+                        (String) map.get("gui-name")
                 ))
                 .toList();
         String startCycleStr = config.getString("rotation.start-cycle");
@@ -37,7 +39,7 @@ public class RotationManager {
     public List<String> getWorlds() {
         List<String> rv = new ArrayList<>();
         for (WorldInfo worldInfo: worlds) {
-            rv.add(worldInfo.getName());
+            rv.add(worldInfo.getId());
         }
         return rv;
     }
@@ -50,7 +52,7 @@ public class RotationManager {
     }
 
     public String getNextWorldName() {
-        return worlds.get((getCurrentWorldIndex() + 1) % worlds.size()).getName();
+        return worlds.get((getCurrentWorldIndex() + 1) % worlds.size()).getId();
     }
 
     public long getMinutesUntilNextCycle() {
@@ -72,7 +74,7 @@ public class RotationManager {
     }
 
     public String getCurrentWorldName() {
-        return worlds.get(getCurrentWorldIndex()).getName();
+        return worlds.get(getCurrentWorldIndex()).getId();
     }
 
     public WorldInfo getCurrentWorld() {

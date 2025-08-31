@@ -2,12 +2,18 @@ rotation:
   cycle-minutes: 30
   start-cycle: "2025-07-27T00:00:00Z" # UTC ISO-8601 timestamp
   worlds:
-    - name: "adventure_world_1"
+    - id: "adventure_world_1"
       texture: "http://textures.minecraft.net/texture/abc123..."
+      chat-name: "&cFirst Adventure World"
+      gui-name: "&6Enter Adventure World 1"
     - name: "adventure_world_2"
       texture: "http://textures.minecraft.net/texture/def456..."
+      chat-name: "&Second Adventure World"
+      gui-name: "&6Enter Adventure World 2"
     - name: "adventure_world_3"
       texture: "http://textures.minecraft.net/texture/ghi789..."
+      chat-name: "&Third Adventure World"
+      gui-name: "&6Enter Adventure World 3"
 
 broadcast:
   warn-minutes: 5 # Broadcast this many minutes before rotation
@@ -39,6 +45,17 @@ extraction:
     adventure_world_2:
       - min: [100, 64, 100]
         max: [110, 70, 110]
+  alert-seconds: 3 # how many seconds before extraction to trigger alert
+  alert:
+      particles: true
+      fireworks: true
+      sound: ENTITY_ENDER_DRAGON_GROWL
+      location:
+        use-player: true # true = play at extracting player's position, false = fixed coords
+        world: "adventure_world_1"
+        x: 50
+        y: 70
+        z: 50
 
 gui:
   title: "&6Adventure Menu"

@@ -46,7 +46,7 @@ public class ExtractionListener implements Listener {
         }
 
         // Ignore players not in extraction world
-        if (!player.getWorld().getName().equals(plugin.getRotationManager().getCurrentWorld().getName()))
+        if (!player.getWorld().getName().equals(plugin.getRotationManager().getCurrentWorld().getId()))
             return;
 
         boolean inZone = manager.isInAnyZone(player.getLocation());

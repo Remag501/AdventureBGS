@@ -10,4 +10,4 @@ commands:
 
 depend:
   - Multiverse-Core
-  - WorldGuard
+  - BetterRTP
