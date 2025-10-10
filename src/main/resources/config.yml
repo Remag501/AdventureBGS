@@ -55,6 +55,10 @@ extraction:
     adventure_world_1:
       - min: [0, 64, 0]
         max: [10, 70, 10]
+        portal_min: [0, 0, 0]
+        portal_max: [0, 0, 0]
+        beacon_loc: []
+        particle_loc: []
       - min: [20, 64, 20]
         max: [30, 70, 30]
     adventure_world_2:
