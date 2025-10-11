@@ -3,6 +3,7 @@ package me.remag501.adventurebgs.listeners;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.model.ExtractionState;
 import me.remag501.adventurebgs.managers.ExtractionManager;
+import me.remag501.adventurebgs.model.ExtractionZone;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
@@ -18,6 +19,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,17 +51,18 @@ public class ExtractionListener implements Listener {
         if (!player.getWorld().getName().equals(plugin.getRotationManager().getCurrentWorld().getId()))
             return;
 
-        boolean inZone = manager.isInAnyZone(player.getLocation());
+        ExtractionZone zone = manager.getZone(player.getLocation());
+        boolean inZone = zone != null;
         boolean extracting = activeExtractions.containsKey(player.getUniqueId());
 
         if (inZone && !extracting) {
-            startExtraction(player);
+            startExtraction(player, zone);
         } else if (!inZone && extracting) {
             cancelExtraction(player, true);
         }
     }
 
-    private void startExtraction(Player player) {
+    private void startExtraction(Player player, ExtractionZone zone) {
         player.sendMessage(MessageUtil.color(plugin.getConfig().getString("extraction.message.start")
                 .replace("%seconds%", String.valueOf(extractionDuration))));
 
@@ -79,7 +82,7 @@ public class ExtractionListener implements Listener {
             @Override
             public void run() {
                 if (timeLeft <= 0) {
-                    completeExtraction(player);
+                    completeExtraction(player, zone);
                     return;
                 }
 
@@ -111,21 +114,33 @@ public class ExtractionListener implements Listener {
         }
     }
 
-    private void completeExtraction(Player player) {
+    private void completeExtraction(Player player, ExtractionZone zone) {
         cancelExtraction(player, false);
         player.sendMessage(MessageUtil.color(plugin.getConfig().getString("extraction.message.success")));
 
-        // Teleport to configured spawn
-        String world = plugin.getConfig().getString("extraction.spawn.world");
-        double x = plugin.getConfig().getDouble("extraction.spawn.x");
-        double y = plugin.getConfig().getDouble("extraction.spawn.y");
-        double z = plugin.getConfig().getDouble("extraction.spawn.z");
+        // Get all gate block locations from the zone (defined by portal_min / portal_max)
+        List<Location> gateBlocks = zone.getPortalGateBlocks();
 
-        World spawnWorld = Bukkit.getWorld(world);
-        if (spawnWorld != null) {
-            player.teleport(new Location(spawnWorld, x, y, z));
+        // Store original block data to restore later
+        Map<Location, Material> originalBlocks = new HashMap<>();
+        for (Location loc : gateBlocks) {
+            originalBlocks.put(loc, loc.getBlock().getType());
+            loc.getBlock().setType(Material.AIR);
         }
+
+        // Notify player that the portal is opening
+        player.sendMessage(ChatColor.GOLD + "The extraction gate opens...");
+
+        // Schedule restoration after delay
+        long restoreDelay = plugin.getConfig().getLong("extraction.portal_restore_time", 100); // default 5s
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            for (Map.Entry<Location, Material> entry : originalBlocks.entrySet()) {
+                entry.getKey().getBlock().setType(entry.getValue());
+            }
+            player.sendMessage(ChatColor.GRAY + "The extraction gate closes behind you.");
+        }, restoreDelay);
     }
+
 
     private void triggerAlert(Player extractingPlayer) {
         boolean usePlayerLocation = plugin.getConfig().getBoolean("extraction.alert.location.use-player", true);

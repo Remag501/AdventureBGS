@@ -40,10 +40,16 @@ public class ExtractionManager {
         }
     }
 
-    public boolean isInAnyZone(Location loc) {
+    public ExtractionZone getZone(Location loc) {
         List<ExtractionZone> zones = zonesPerWorld.get(loc.getWorld().getName());
-        if (zones == null) return false;
-        return zones.stream().anyMatch(zone -> zone.contains(loc));
+        if (zones == null) return null;
+
+        for (ExtractionZone zone : zones) {
+            if (zone.contains(loc)) {
+                return zone;
+            }
+        }
+        return null;
     }
 
     public boolean isInPortal(Location loc) {

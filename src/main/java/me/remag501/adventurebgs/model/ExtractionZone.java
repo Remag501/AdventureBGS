@@ -2,7 +2,9 @@ package me.remag501.adventurebgs.model;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExtractionZone {
@@ -76,4 +78,21 @@ public class ExtractionZone {
     public String getWorld() {
         return world;
     }
+
+    public List<Location> getPortalGateBlocks() {
+        List<Location> blocks = new ArrayList<>();
+        World w = Bukkit.getWorld(world);
+        if (w == null) return blocks;
+
+        for (int x = portalMinX; x <= portalMaxX; x++) {
+            for (int y = portalMinY; y <= portalMaxY; y++) {
+                for (int z = portalMinZ; z <= portalMaxZ; z++) {
+                    blocks.add(new Location(w, x, y, z));
+                }
+            }
+        }
+        return blocks;
+    }
+
+
 }
