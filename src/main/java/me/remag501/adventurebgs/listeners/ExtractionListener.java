@@ -9,13 +9,10 @@ import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
@@ -53,6 +50,9 @@ public class ExtractionListener implements Listener {
 
         ExtractionZone zone = manager.getZone(player.getLocation());
         boolean inZone = zone != null;
+        if (inZone && !zone.isEnabled())
+            return;
+
         boolean extracting = activeExtractions.containsKey(player.getUniqueId());
 
         if (inZone && !extracting) {
@@ -128,17 +128,26 @@ public class ExtractionListener implements Listener {
             loc.getBlock().setType(Material.AIR);
         }
 
-        // Notify player that the portal is opening
-        player.sendMessage(ChatColor.GOLD + "The extraction gate opens...");
+        // Set extraction down
+        zone.setEnabled(false);
 
         // Schedule restoration after delay
         long restoreDelay = plugin.getConfig().getLong("extraction.portal-restore-time", 100); // default 5s
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
+
+            // Restore blocks
             for (Map.Entry<Location, Material> entry : originalBlocks.entrySet()) {
                 entry.getKey().getBlock().setType(entry.getValue());
             }
-            player.sendMessage(ChatColor.GRAY + "The extraction gate closes behind you.");
+
+            // Schedule extraction up
+            long zoneDowntime = plugin.getConfig().getLong("extraction.down-time", 200); // default 20s
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                zone.setEnabled(true);
+            }, zoneDowntime);
+
         }, restoreDelay);
+
     }
 
 

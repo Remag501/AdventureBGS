@@ -19,6 +19,8 @@ public class ExtractionZone {
     private final Location beaconLoc;
     private final Location particleLoc;
 
+    private boolean enabled;
+
     public ExtractionZone(String world, int[] min, int[] max, int[] portalMin, int[] portalMax,
                           List<Double> beaconLoc, List<Double> particleLoc) {
 
@@ -49,6 +51,8 @@ public class ExtractionZone {
         this.particleLoc = particleLoc != null && particleLoc.size() == 3
                 ? new Location(Bukkit.getWorld(world), particleLoc.get(0), particleLoc.get(1), particleLoc.get(2))
                 : null;
+
+        enabled = true;
     }
 
     public boolean contains(Location loc) {
@@ -92,6 +96,14 @@ public class ExtractionZone {
             }
         }
         return blocks;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
 
