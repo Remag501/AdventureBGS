@@ -49,10 +49,12 @@ extraction:
     y: 64
     z: 0
   message:
-    title: "Extracting... %seconds%"
-    start: "&aExtraction initiated! Hold still for %seconds% seconds..."
-    success: "&aExtraction complete! Teleporting..."
-    cancel: "&cYou left the extraction zone!"
+    start: "&eExtraction starting in %seconds%s!"
+    title: "&aExtracting... %seconds%s"
+    success: "&aExtraction successful!"
+    portal-open: "&bPortal is open for %seconds%s!"
+    down: "&cExtraction zone is down for %seconds%s!"
+    cancel: "&cExtraction canceled!"
   zones:
     adventure_world_1:
       - min: [0, 64, 0]

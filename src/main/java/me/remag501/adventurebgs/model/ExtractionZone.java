@@ -3,9 +3,15 @@ package me.remag501.adventurebgs.model;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class ExtractionZone {
 
@@ -20,7 +26,21 @@ public class ExtractionZone {
     private final Location particleLoc;
 
     private boolean enabled;
+    private boolean portalOpen;
 
+    // --- ZONE STATE FIELDS ---
+    private BossBar extractionBossBar;
+    private BukkitRunnable extractionTask;
+    // Players currently in the zone during countdown
+    private final Set<UUID> extractingPlayers = new HashSet<>();
+
+    // BossBar used during the "Portal Open" period (NEW)
+    private BossBar portalBossBar;
+
+    // BossBar used during the "Zone Down" period (for visibility fix)
+    private BossBar cooldownBossBar;
+
+    // Original Constructor
     public ExtractionZone(String world, int[] min, int[] max, int[] portalMin, int[] portalMax,
                           List<Double> beaconLoc, List<Double> particleLoc) {
 
@@ -53,6 +73,113 @@ public class ExtractionZone {
                 : null;
 
         enabled = true;
+    }
+
+    // --- GETTERS/SETTERS FOR STATE ---
+
+    /** Checks if the extraction timer is currently running. */
+    public boolean isExtracting() {
+        return extractionTask != null;
+    }
+
+    /** Checks if the zone is currently in the disabled cooldown phase. */
+    public boolean isDown() {
+        return !enabled && !portalOpen;
+    }
+
+    public BossBar getExtractionBossBar() {
+        return extractionBossBar;
+    }
+
+    // NEW: Getter for the Portal BossBar
+    public BossBar getPortalBossBar() {
+        return portalBossBar;
+    }
+
+    // NEW: Setter for the Portal BossBar
+    public void setPortalBossBar(BossBar portalBossBar) {
+        this.portalBossBar = portalBossBar;
+    }
+
+    public BossBar getCooldownBossBar() {
+        return cooldownBossBar;
+    }
+
+    /** Checks if there are any players currently in the extraction zone. */
+    public boolean isEmpty() {
+        return extractingPlayers.isEmpty();
+    }
+
+    /** Returns the UUIDs of players currently standing in the extraction zone. */
+    public Set<UUID> getExtractingPlayers() {
+        return extractingPlayers;
+    }
+
+    /** Sets the BukkitRunnable task for cancellation purposes. */
+    public void setExtractionTask(BukkitRunnable task) {
+        this.extractionTask = task;
+    }
+
+    // --- METHODS FOR STATE MANAGEMENT ---
+
+    /** Initializes the extraction state for the zone. */
+    public void startExtraction(BukkitRunnable task, BossBar bar, Player initialPlayer) {
+        this.extractionBossBar = bar;
+        // The listener calls setExtractionTask separately after creating the Runnable
+        addExtractingPlayer(initialPlayer);
+    }
+
+    /** Adds a player to the tracking set. */
+    public void addExtractingPlayer(Player player) {
+        extractingPlayers.add(player.getUniqueId());
+    }
+
+    /** Removes a player from the tracking set. */
+    public void removeExtractingPlayer(Player player) {
+        extractingPlayers.remove(player.getUniqueId());
+        // BossBar removal is not needed here as the bar is global to the world.
+    }
+
+    /** Cleans up and resets the active extraction state (task and boss bar). */
+    public void cancelExtraction() {
+        if (extractionTask != null) {
+            extractionTask.cancel();
+        }
+        if (extractionBossBar != null) {
+            extractionBossBar.removeAll();
+        }
+        extractionTask = null;
+        extractionBossBar = null;
+        extractingPlayers.clear();
+    }
+
+    /** Sets the active cooldown state and BossBar. */
+    public void setCooldownState(BossBar bar) {
+        this.cooldownBossBar = bar;
+    }
+
+    /** Cleans up and resets the cooldown state, re-enabling the zone. */
+    public void endCooldown() {
+        if (cooldownBossBar != null) {
+            cooldownBossBar.removeAll();
+        }
+        cooldownBossBar = null;
+        this.enabled = true; // Zone is now truly ready
+    }
+
+    // --- EXISTING METHODS ---
+
+    public boolean isPortalOpen() {
+        return portalOpen;
+    }
+
+    public void setPortalOpen(boolean portalOpen) {
+        this.portalOpen = portalOpen;
+        // Clean up the portal boss bar when the portal closes
+        if (!portalOpen && portalBossBar != null) {
+            portalBossBar.removeAll();
+            portalBossBar = null;
+        }
     }
 
     public boolean contains(Location loc) {
@@ -113,5 +240,4 @@ public class ExtractionZone {
     public int getOpenSeconds() {
         return 11;
     }
-
 }
