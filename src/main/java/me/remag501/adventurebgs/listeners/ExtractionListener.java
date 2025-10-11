@@ -34,6 +34,27 @@ public class ExtractionListener implements Listener {
     }
 
     /**
+     * Changes the color of the two glass blocks above the beacon for a visual indicator.
+     */
+    private void updateBeaconColor(ExtractionZone zone, Material glassType) {
+        Location beaconLoc = zone.getBeaconLoc();
+        if (beaconLoc == null) return;
+
+        World world = Bukkit.getWorld(zone.getWorld());
+        if (world == null) return;
+
+        // Position 1: Directly above the beacon (y+1)
+        Location glassLoc1 = beaconLoc.clone().add(0, 1, 0);
+        // Position 2: Two blocks above the beacon (y+2)
+        Location glassLoc2 = beaconLoc.clone().add(0, 2, 0);
+
+        // Ensure the blocks are placed in the correct world
+        // Note: beaconLoc already contains the correct world reference
+        glassLoc1.getBlock().setType(glassType);
+        glassLoc2.getBlock().setType(glassType);
+    }
+
+    /**
      * Sends a message to all online players currently within the bounds of the given ExtractionZone.
      */
     private void messagePlayersInZone(ExtractionZone zone, String message) {
@@ -205,7 +226,8 @@ public class ExtractionListener implements Listener {
 
                 int alertSeconds = plugin.getConfig().getInt("extraction.alert-seconds", 3);
                 if (timeLeft == alertSeconds && !alertTriggered) {
-                     triggerAlert(zone);
+                    // IMPLEMENTED: Global Alert System call
+                    triggerAlert(zone);
                     alertTriggered = true;
                 }
 
@@ -251,6 +273,9 @@ public class ExtractionListener implements Listener {
 
         zone.setEnabled(false); // Zone is now disabled for the cooldown
         zone.setPortalOpen(true);
+
+        // BEACON UPDATE: Portal is open -> Yellow
+        updateBeaconColor(zone, Material.YELLOW_STAINED_GLASS);
 
         // --- Portal open phase ---
         int portalOpenSeconds = plugin.getConfig().getInt("extraction.portal-open-seconds", 7);
@@ -299,6 +324,9 @@ public class ExtractionListener implements Listener {
                     // ZONE DOWN MESSAGE: RESERVED for players inside the zone
                     messagePlayersInZone(zone, zoneDownMsg);
 
+                    // BEACON UPDATE: Zone is down -> Red
+                    updateBeaconColor(zone, Material.RED_STAINED_GLASS);
+
                     BossBar downBar = Bukkit.createBossBar(
                             ChatColor.RED + "Extraction down for " + zoneDownSeconds + "s",
                             BarColor.RED,
@@ -321,6 +349,9 @@ public class ExtractionListener implements Listener {
                             if (downTimeLeft <= 0) {
                                 downBar.removeAll(); // Ensure the cooldown bar is removed
                                 zone.endCooldown();
+
+                                // BEACON UPDATE: Zone is ready -> Green
+                                updateBeaconColor(zone, Material.LIME_STAINED_GLASS);
 
                                 String reEnabledMsg = "&aExtraction zone is now open again!";
                                 // RE-ENABLED MESSAGE: RESERVED for players inside the zone
@@ -347,7 +378,7 @@ public class ExtractionListener implements Listener {
 
 
     /**
-     * Triggers a global alert (sound, title, particles) to warn all players in the world
+     * Triggers a global alert (sound, particles) to warn all players in the world
      * that an extraction is about to be completed.
      */
     private void triggerAlert(ExtractionZone zone) {
