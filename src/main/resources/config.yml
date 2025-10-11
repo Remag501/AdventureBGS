@@ -41,6 +41,8 @@ penalty:
 
 extraction:
   duration: 5 # seconds to stand in zone
+  portal-restore-time: 3
+  extraction-down-time: 5
   spawn:
     world: "spawn"
     x: 0

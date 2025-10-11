@@ -132,7 +132,7 @@ public class ExtractionListener implements Listener {
         player.sendMessage(ChatColor.GOLD + "The extraction gate opens...");
 
         // Schedule restoration after delay
-        long restoreDelay = plugin.getConfig().getLong("extraction.portal_restore_time", 100); // default 5s
+        long restoreDelay = plugin.getConfig().getLong("extraction.portal-restore-time", 100); // default 5s
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             for (Map.Entry<Location, Material> entry : originalBlocks.entrySet()) {
                 entry.getKey().getBlock().setType(entry.getValue());
@@ -143,42 +143,42 @@ public class ExtractionListener implements Listener {
 
 
     private void triggerAlert(Player extractingPlayer) {
-        boolean usePlayerLocation = plugin.getConfig().getBoolean("extraction.alert.location.use-player", true);
-        Location loc;
-
-        if (usePlayerLocation) {
-            loc = extractingPlayer.getLocation();
-        } else {
-            World world = Bukkit.getWorld(plugin.getConfig().getString("extraction.alert.location.world"));
-            double x = plugin.getConfig().getDouble("extraction.alert.location.x");
-            double y = plugin.getConfig().getDouble("extraction.alert.location.y");
-            double z = plugin.getConfig().getDouble("extraction.alert.location.z");
-            loc = new Location(world, x, y, z);
-        }
-
-        // Fireworks
-        if (plugin.getConfig().getBoolean("extraction.alert.fireworks", true)) {
-            Firework firework = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
-            FireworkMeta meta = firework.getFireworkMeta();
-            meta.addEffect(FireworkEffect.builder()
-                    .withColor(Color.RED)
-                    .with(FireworkEffect.Type.BALL_LARGE)
-                    .flicker(true)
-                    .trail(true)
-                    .build());
-            meta.setPower(1);
-            firework.setFireworkMeta(meta);
-        }
-
-        // Particles
-        if (plugin.getConfig().getBoolean("extraction.alert.particles", true)) {
-            loc.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, loc, 5, 1, 1, 1, 0.05);
-        }
-
-        // Sound
-        String soundName = plugin.getConfig().getString("extraction.alert.sound", "ENTITY_ENDER_DRAGON_GROWL");
-        Sound sound = Sound.valueOf(soundName);
-        loc.getWorld().playSound(loc, sound, 1.0f, 1.0f);
+//        boolean usePlayerLocation = plugin.getConfig().getBoolean("extraction.alert.location.use-player", true);
+//        Location loc;
+//
+//        if (usePlayerLocation) {
+//            loc = extractingPlayer.getLocation();
+//        } else {
+//            World world = Bukkit.getWorld(plugin.getConfig().getString("extraction.alert.location.world"));
+//            double x = plugin.getConfig().getDouble("extraction.alert.location.x");
+//            double y = plugin.getConfig().getDouble("extraction.alert.location.y");
+//            double z = plugin.getConfig().getDouble("extraction.alert.location.z");
+//            loc = new Location(world, x, y, z);
+//        }
+//
+//        // Fireworks
+//        if (plugin.getConfig().getBoolean("extraction.alert.fireworks", true)) {
+//            Firework firework = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
+//            FireworkMeta meta = firework.getFireworkMeta();
+//            meta.addEffect(FireworkEffect.builder()
+//                    .withColor(Color.RED)
+//                    .with(FireworkEffect.Type.BALL_LARGE)
+//                    .flicker(true)
+//                    .trail(true)
+//                    .build());
+//            meta.setPower(1);
+//            firework.setFireworkMeta(meta);
+//        }
+//
+//        // Particles
+//        if (plugin.getConfig().getBoolean("extraction.alert.particles", true)) {
+//            loc.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, loc, 5, 1, 1, 1, 0.05);
+//        }
+//
+//        // Sound
+//        String soundName = plugin.getConfig().getString("extraction.alert.sound", "ENTITY_ENDER_DRAGON_GROWL");
+//        Sound sound = Sound.valueOf(soundName);
+//        loc.getWorld().playSound(loc, sound, 1.0f, 1.0f);
     }
 
 }
