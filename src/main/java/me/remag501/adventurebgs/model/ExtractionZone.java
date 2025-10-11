@@ -106,5 +106,12 @@ public class ExtractionZone {
         this.enabled = enabled;
     }
 
+    public int getReopenSeconds() {
+        return 179;
+    }
+
+    public int getOpenSeconds() {
+        return 11;
+    }
 
 }

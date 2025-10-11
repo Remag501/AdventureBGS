@@ -118,36 +118,84 @@ public class ExtractionListener implements Listener {
         cancelExtraction(player, false);
         player.sendMessage(MessageUtil.color(plugin.getConfig().getString("extraction.message.success")));
 
-        // Get all gate block locations from the zone (defined by portal_min / portal_max)
+        // --- Phase 1: Open the portal (replace gate with air) ---
         List<Location> gateBlocks = zone.getPortalGateBlocks();
-
-        // Store original block data to restore later
         Map<Location, Material> originalBlocks = new HashMap<>();
         for (Location loc : gateBlocks) {
             originalBlocks.put(loc, loc.getBlock().getType());
             loc.getBlock().setType(Material.AIR);
         }
 
-        // Set extraction down
-        zone.setEnabled(false);
+        zone.setEnabled(false); // disable the zone temporarily
 
-        // Schedule restoration after delay
-        long restoreDelay = plugin.getConfig().getLong("extraction.portal-restore-time", 100); // default 5s
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        // --- Portal open phase ---
+        int portalOpenSeconds = plugin.getConfig().getInt("extraction.portal-open-seconds", 7);
+        player.sendMessage(MessageUtil.color(
+                plugin.getConfig().getString("extraction.message.portal-open")
+                        .replace("%seconds%", String.valueOf(portalOpenSeconds))
+        ));
 
-            // Restore blocks
-            for (Map.Entry<Location, Material> entry : originalBlocks.entrySet()) {
-                entry.getKey().getBlock().setType(entry.getValue());
+        BossBar portalBar = Bukkit.createBossBar(
+                ChatColor.AQUA + "Portal open for " + portalOpenSeconds + "s",
+                BarColor.BLUE,
+                BarStyle.SOLID
+        );
+        portalBar.addPlayer(player);
+
+        BukkitRunnable portalTask = new BukkitRunnable() {
+            int timeLeft = portalOpenSeconds;
+
+            @Override
+            public void run() {
+                if (timeLeft <= 0) {
+                    portalBar.removeAll();
+                    cancel();
+
+                    // --- Phase 2: Close portal (restore blocks) ---
+                    for (Map.Entry<Location, Material> entry : originalBlocks.entrySet()) {
+                        entry.getKey().getBlock().setType(entry.getValue());
+                    }
+
+                    // --- Phase 3: Extraction down (cooldown) ---
+                    int zoneDownSeconds = plugin.getConfig().getInt("extraction.down-seconds", 10);
+                    player.sendMessage(MessageUtil.color(
+                            plugin.getConfig().getString("extraction.message.down")
+                                    .replace("%seconds%", String.valueOf(zoneDownSeconds))
+                    ));
+
+                    BossBar downBar = Bukkit.createBossBar(
+                            ChatColor.RED + "Extraction down for " + zoneDownSeconds + "s",
+                            BarColor.RED,
+                            BarStyle.SOLID
+                    );
+                    downBar.addPlayer(player);
+
+                    new BukkitRunnable() {
+                        int downTimeLeft = zoneDownSeconds;
+
+                        @Override
+                        public void run() {
+                            if (downTimeLeft <= 0) {
+                                downBar.removeAll();
+                                zone.setEnabled(true);
+                                player.sendMessage(MessageUtil.color("&aExtraction zone is now open again!"));
+                                cancel();
+                                return;
+                            }
+                            downBar.setProgress((double) downTimeLeft / zoneDownSeconds);
+                            downBar.setTitle(ChatColor.RED + "Extraction down for " + downTimeLeft + "s");
+                            downTimeLeft--;
+                        }
+                    }.runTaskTimer(plugin, 0L, 20L);
+                } else {
+                    portalBar.setProgress((double) timeLeft / portalOpenSeconds);
+                    portalBar.setTitle(ChatColor.AQUA + "Portal open for " + timeLeft + "s");
+                    timeLeft--;
+                }
             }
+        };
 
-            // Schedule extraction up
-            long zoneDowntime = plugin.getConfig().getLong("extraction.down-time", 200); // default 20s
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                zone.setEnabled(true);
-            }, zoneDowntime);
-
-        }, restoreDelay);
-
+        portalTask.runTaskTimer(plugin, 0L, 20L);
     }
 
 
