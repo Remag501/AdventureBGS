@@ -205,8 +205,7 @@ public class ExtractionListener implements Listener {
 
                 int alertSeconds = plugin.getConfig().getInt("extraction.alert-seconds", 3);
                 if (timeLeft == alertSeconds && !alertTriggered) {
-                    // TODO: Implement zone-based alert here
-                    // triggerAlert(zone);
+                     triggerAlert(zone);
                     alertTriggered = true;
                 }
 
@@ -347,9 +346,43 @@ public class ExtractionListener implements Listener {
     }
 
 
-    // This method is the final piece of the competitive system to implement.
+    /**
+     * Triggers a global alert (sound, title, particles) to warn all players in the world
+     * that an extraction is about to be completed.
+     */
     private void triggerAlert(ExtractionZone zone) {
-        // Implementation for the global audio/visual alert goes here,
-        // referencing the zone's location (beaconLoc/particleLoc).
+        // 1. Fetch config values for the alert
+        String rawSound = plugin.getConfig().getString("extraction.alert.sound", "ENTITY_WITHER_SPAWN");
+
+        World world = Bukkit.getWorld(zone.getWorld());
+        if (world == null) return;
+
+        // 2. Play sound to ALL players in the extraction world
+        try {
+            Sound alertSound = Sound.valueOf(rawSound.toUpperCase());
+            for (Player p : world.getPlayers()) {
+                // Play sound localized to the zone's beacon/particle location
+                Location soundLoc = zone.getBeaconLoc() != null ? zone.getBeaconLoc() : p.getLocation();
+                p.playSound(soundLoc, alertSound, 2.0f, 1.0f);
+            }
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning("Invalid sound configured for extraction alert: " + rawSound);
+        }
+
+        // 3. Spawn particles at the specified location (beacon or particle location)
+        Location particleLoc = zone.getParticleLoc() != null ? zone.getParticleLoc() : zone.getBeaconLoc();
+        if (particleLoc != null) {
+            // Create a burst of particles simulating a flare or fireworks to draw attention
+
+            // Large upward visual flare (Fireworks Spark)
+            world.spawnParticle(Particle.FIREWORKS_SPARK, particleLoc, 100, 0.5, 0.5, 0.5, 0.5);
+
+            // Colored smoke/dust trail for drama (Green and Yellow)
+            world.spawnParticle(Particle.REDSTONE, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.LIME, 1.5f));
+            world.spawnParticle(Particle.REDSTONE, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1.5f));
+
+            // Instantaneous large explosion effect for emphasis
+            world.spawnParticle(Particle.EXPLOSION_LARGE, particleLoc, 1, 0, 0, 0, 0);
+        }
     }
 }
