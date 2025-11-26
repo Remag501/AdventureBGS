@@ -36,7 +36,7 @@ public class ExtractionListener implements Listener {
     /**
      * Changes the color of the two glass blocks above the beacon for a visual indicator.
      */
-    private void updateBeaconColor(ExtractionZone zone, Material glassType) {
+    private void updateBeaconColor(ExtractionZone zone, Material glassType1, Material glassType2) {
         Location beaconLoc = zone.getBeaconLoc();
         if (beaconLoc == null) return;
 
@@ -50,8 +50,8 @@ public class ExtractionListener implements Listener {
 
         // Ensure the blocks are placed in the correct world
         // Note: beaconLoc already contains the correct world reference
-        glassLoc1.getBlock().setType(glassType);
-        glassLoc2.getBlock().setType(glassType);
+        glassLoc1.getBlock().setType(glassType1);
+        glassLoc2.getBlock().setType(glassType2);
     }
 
     /**
@@ -275,7 +275,7 @@ public class ExtractionListener implements Listener {
         zone.setPortalOpen(true);
 
         // BEACON UPDATE: Portal is open -> Yellow
-        updateBeaconColor(zone, Material.YELLOW_STAINED_GLASS);
+        updateBeaconColor(zone, Material.YELLOW_STAINED_GLASS, Material.BLACK_CONCRETE);
 
         // --- Portal open phase ---
         int portalOpenSeconds = plugin.getConfig().getInt("extraction.portal-open-seconds", 7);
@@ -325,7 +325,7 @@ public class ExtractionListener implements Listener {
                     messagePlayersInZone(zone, zoneDownMsg);
 
                     // BEACON UPDATE: Zone is down -> Red
-                    updateBeaconColor(zone, Material.RED_STAINED_GLASS);
+                    updateBeaconColor(zone, Material.RED_STAINED_GLASS, Material.RED_STAINED_GLASS);
 
                     BossBar downBar = Bukkit.createBossBar(
                             ChatColor.RED + "Extraction down for " + zoneDownSeconds + "s",
@@ -351,7 +351,7 @@ public class ExtractionListener implements Listener {
                                 zone.endCooldown();
 
                                 // BEACON UPDATE: Zone is ready -> Green
-                                updateBeaconColor(zone, Material.LIME_STAINED_GLASS);
+                                updateBeaconColor(zone, Material.LIME_STAINED_GLASS, Material.LIME_STAINED_GLASS);
 
                                 String reEnabledMsg = "&aExtraction zone is now open again!";
                                 // RE-ENABLED MESSAGE: RESERVED for players inside the zone
