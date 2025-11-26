@@ -96,3 +96,13 @@ gui:
     lore:
       - "&7Closes in: %minutes_left% minutes"
       - "&7Next map: %next_world%"
+      -
+
+weather:
+  - type: blizzard
+    world: icycavern
+    min_duration: 5 # seconds
+    max_duration: 30
+    min_frequency: 2 # minutes
+    max_frequency: 5 # minutes
+    # properties: []
