@@ -8,46 +8,35 @@ public class WeatherModel {
     private final int minDurationSeconds;
     private final int maxDurationSeconds;
 
-    private final int minFrequencySeconds;
-    private final int maxFrequencySeconds;
+    private final int minFrequencyMinutes;
+    private final int maxFrequencyMinutes;
 
     public WeatherModel(
             String type,
             String world,
             int minDurationSeconds,
             int maxDurationSeconds,
-            int minFrequencySeconds,
-            int maxFrequencySeconds
+            int minFrequencyMinutes,
+            int maxFrequencyMinutes
     ) {
         this.type = type;
         this.world = world;
         this.minDurationSeconds = minDurationSeconds;
         this.maxDurationSeconds = maxDurationSeconds;
-        this.minFrequencySeconds = minFrequencySeconds;
-        this.maxFrequencySeconds = maxFrequencySeconds;
+        this.minFrequencyMinutes = minFrequencyMinutes;
+        this.maxFrequencyMinutes = maxFrequencyMinutes;
     }
 
-    public String getType() {
-        return type;
+    public String getType() { return type; }
+    public String getWorld() { return world; }
+
+    public int randomDurationSeconds() {
+        return minDurationSeconds +
+                (int) (Math.random() * (maxDurationSeconds - minDurationSeconds + 1));
     }
 
-    public String getWorld() {
-        return world;
-    }
-
-    public int getMinDurationSeconds() {
-        return minDurationSeconds;
-    }
-
-    public int getMaxDurationSeconds() {
-        return maxDurationSeconds;
-    }
-
-    public int getMinFrequencySeconds() {
-        return minFrequencySeconds;
-    }
-
-    public int getMaxFrequencySeconds() {
-        return maxFrequencySeconds;
+    public int randomFrequencyMinutes() {
+        return minFrequencyMinutes +
+                (int) (Math.random() * (maxFrequencyMinutes - minFrequencyMinutes + 1));
     }
 }
