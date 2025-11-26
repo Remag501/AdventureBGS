@@ -2,115 +2,79 @@ package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.model.WeatherModel;
+import me.remag501.adventurebgs.weather.BlizzardEffect;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class WeatherManager {
 
     private final AdventureBGS plugin;
-    private final Random random = new Random();
-
-    // World -> weather entries
-    private final Map<String, List<WeatherModel>> weatherByWorld = new HashMap<>();
-
-    // Active weather tasks per world
-    private final Map<String, BukkitRunnable> activeWeatherTasks = new HashMap<>();
+    private final List<WeatherModel> weathers = new ArrayList<>();
 
     public WeatherManager(AdventureBGS plugin) {
         this.plugin = plugin;
-        loadWeatherConfig();
-        startSchedulers();
+        loadWeather();
+        startScheduling();
     }
 
-    private void loadWeatherConfig() {
+    private void loadWeather() {
         List<Map<?, ?>> list = plugin.getConfig().getMapList("weather");
 
         for (Map<?, ?> map : list) {
-            String type = (String) map.get("type");
-            String world = (String) map.get("world");
-
-            int minDuration = (int) map.get("min_duration");
-            int maxDuration = (int) map.get("max_duration");
-
-            int minFrequency = (int) map.get("min_frequency") * 60;
-            int maxFrequency = (int) map.get("max_frequency") * 60;
-
             WeatherModel model = new WeatherModel(
-                    type,
-                    world,
-                    minDuration,
-                    maxDuration,
-                    minFrequency,
-                    maxFrequency
+                    (String) map.get("type"),
+                    (String) map.get("world"),
+                    (int) map.get("min_duration"),
+                    (int) map.get("max_duration"),
+                    (int) map.get("min_frequency"),
+                    (int) map.get("max_frequency")
             );
-
-            weatherByWorld
-                    .computeIfAbsent(world, k -> new ArrayList<>())
-                    .add(model);
+            weathers.add(model);
         }
     }
 
-    private void startSchedulers() {
-        for (Map.Entry<String, List<WeatherModel>> entry : weatherByWorld.entrySet()) {
-            String world = entry.getKey();
-            scheduleNextWeather(world);
+    private void startScheduling() {
+        for (WeatherModel model : weathers) {
+            scheduleNext(model);
         }
     }
 
-    private void scheduleNextWeather(String world) {
-        List<WeatherModel> models = weatherByWorld.get(world);
-        if (models == null || models.isEmpty()) return;
+    private void scheduleNext(WeatherModel model) {
+        int delayTicks = model.randomFrequencyMinutes() * 60 * 20;
 
-        WeatherModel model = models.get(random.nextInt(models.size()));
-        int delaySeconds = randomBetween(
-                model.getMinFrequencySeconds(),
-                model.getMaxFrequencySeconds()
-        );
-
-        BukkitRunnable task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                startWeather(model);
-            }
-        };
-
-        task.runTaskLater(plugin, delaySeconds * 20L);
-        activeWeatherTasks.put(world, task);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            startWeather(model);
+            scheduleNext(model); // chain forever
+        }, delayTicks);
     }
 
     private void startWeather(WeatherModel model) {
-        String world = model.getWorld();
+        World world = Bukkit.getWorld(model.getWorld());
+        if (world == null) return;
 
-        // ✅ Hook later: start blizzard effects
-        Bukkit.getLogger().info("[Weather] Starting " + model.getType() + " in " + world);
+        if (model.getType().equalsIgnoreCase("blizzard")) {
+            startBlizzard(model, world);
+        }
+    }
 
-        int duration = randomBetween(
-                model.getMinDurationSeconds(),
-                model.getMaxDurationSeconds()
-        );
+    private void startBlizzard(WeatherModel model, World world) {
+        int durationTicks = model.randomDurationSeconds() * 20;
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                stopWeather(model);
+                BlizzardEffect.tick(world);
             }
-        }.runTaskLater(plugin, duration * 20L);
-    }
+        }.runTaskTimer(plugin, 0L, 40L); // every 2s
 
-    private void stopWeather(WeatherModel model) {
-        String world = model.getWorld();
-
-        // ✅ Hook later: stop blizzard effects
-        Bukkit.getLogger().info("[Weather] Stopping " + model.getType() + " in " + world);
-
-        // Schedule next occurrence
-        scheduleNextWeather(world);
-    }
-
-    private int randomBetween(int min, int max) {
-        return min + random.nextInt(max - min + 1);
+        Bukkit.getScheduler().runTaskLater(plugin,
+                () -> BlizzardEffect.stop(world),
+                durationTicks
+        );
     }
 }
