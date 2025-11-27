@@ -51,7 +51,7 @@ public class WeatherManager {
     }
 
     private void scheduleNext(WeatherModel model) {
-        int delayTicks = model.randomFrequencyMinutes() * 60 * 20;
+        int delayTicks = model.randomFrequencyMinutes() * 60 * 20; // Won't wait for previous weather to finish up
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             startWeather(model);
@@ -69,6 +69,7 @@ public class WeatherManager {
         int durationTicks = model.randomDurationSeconds() * 20;
 
         effect.start(world);
+        plugin.getLogger().info("Starting weather " + model.getType() + " for " + (durationTicks / 20) + " seconds in world " + world.getName() + ".");
 
         BukkitRunnable tickTask = new BukkitRunnable() {
             @Override
