@@ -16,6 +16,7 @@ public class AdventureBGS extends JavaPlugin {
     private GuiManager guiManager;
     private ExtractionManager extractionManager;
     private PenaltyManager penaltyManager;
+    private WeatherManager weatherManager;
 
     @Override
     public void onEnable() {
@@ -26,6 +27,7 @@ public class AdventureBGS extends JavaPlugin {
         guiManager = new GuiManager(this);
         extractionManager = new ExtractionManager(this);
         penaltyManager = new PenaltyManager(this);
+        weatherManager = new WeatherManager(this);
 
         // Preload all configured worlds
         preloadWorlds();
@@ -79,5 +81,9 @@ public class AdventureBGS extends JavaPlugin {
 
     public GuiManager getGuiManager() {
         return guiManager;
+    }
+
+    public WeatherManager getWeatherManager() {
+        return weatherManager;
     }
 }

@@ -5,15 +5,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class BlizzardEffect {
+public class BlizzardWeather implements WeatherEffect {
 
-    public static void tick(World world) {
+    @Override
+    public void start(World world) {
+        world.setStorm(true);
+        world.setThundering(false);
+    }
+
+    @Override
+    public void tick(World world) {
         for (Player player : world.getPlayers()) {
-
-            // Cold damage
             player.damage(1.0);
 
-            // Heavy slow + vision punishment
             player.addPotionEffect(new PotionEffect(
                     PotionEffectType.SLOW,
                     60,
@@ -22,15 +26,6 @@ public class BlizzardEffect {
                     false
             ));
 
-            player.addPotionEffect(new PotionEffect(
-                    PotionEffectType.BLINDNESS,
-                    40,
-                    0,
-                    true,
-                    false
-            ));
-
-            // Atmosphere (cheap)
             world.spawnParticle(
                     Particle.SNOWFLAKE,
                     player.getLocation(),
@@ -41,8 +36,8 @@ public class BlizzardEffect {
         }
     }
 
-    public static void stop(World world) {
-        // Intentionally empty for now
-        // Potion effects expire naturally
+    @Override
+    public void stop(World world) {
+        world.setStorm(false);
     }
 }
