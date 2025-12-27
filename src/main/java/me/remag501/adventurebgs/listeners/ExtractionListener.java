@@ -5,6 +5,7 @@ import me.remag501.adventurebgs.managers.ExtractionManager;
 import me.remag501.adventurebgs.model.ExtractionZone;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -40,19 +41,24 @@ public class ExtractionListener implements Listener {
         Location beaconLoc = zone.getBeaconLoc();
         if (beaconLoc == null) return;
 
-        World world = Bukkit.getWorld(zone.getWorld());
+        World world = beaconLoc.getWorld();
         if (world == null) return;
 
-        // Position 1: Directly above the beacon (y+1)
-        Location glassLoc1 = beaconLoc.clone().add(0, 1, 0);
-        // Position 2: Two blocks above the beacon (y+2)
-        Location glassLoc2 = beaconLoc.clone().add(0, 2, 0);
+        int chunkX = beaconLoc.getBlockX() >> 4;
+        int chunkZ = beaconLoc.getBlockZ() >> 4;
 
-        // Ensure the blocks are placed in the correct world
-        // Note: beaconLoc already contains the correct world reference
-        glassLoc1.getBlock().setType(glassType1);
-        glassLoc2.getBlock().setType(glassType2);
+        world.getChunkAtAsync(chunkX, chunkZ, /* generate */ false, chunk -> {
+            // Runs once the chunk is loaded — **without blocking the main thread**
+            // Now you can safely update blocks inside a Bukkit task
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                Block glass1 = beaconLoc.clone().add(0, 1, 0).getBlock();
+                Block glass2 = beaconLoc.clone().add(0, 2, 0).getBlock();
+                glass1.setType(glassType1, false);
+                glass2.setType(glassType2, false);
+            });
+        });
     }
+
 
     /**
      * Sends a message to all online players currently within the bounds of the given ExtractionZone.
@@ -275,7 +281,7 @@ public class ExtractionListener implements Listener {
         zone.setPortalOpen(true);
 
         // BEACON UPDATE: Portal is open -> Yellow
-        updateBeaconColor(zone, Material.YELLOW_STAINED_GLASS, Material.BLACK_CONCRETE);
+        updateBeaconColor(zone, Material.AIR, Material.AIR);
 
         // --- Portal open phase ---
         int portalOpenSeconds = plugin.getConfig().getInt("extraction.portal-open-seconds", 7);
@@ -286,8 +292,8 @@ public class ExtractionListener implements Listener {
         messagePlayersInZone(zone, portalOpenMessage);
 
         BossBar portalBar = Bukkit.createBossBar(
-                ChatColor.AQUA + "Portal open for " + portalOpenSeconds + "s",
-                BarColor.BLUE,
+                "§aPortal is open for §a§l" + portalOpenSeconds + " §aseconds...",
+                BarColor.GREEN,
                 BarStyle.SOLID
         );
 
@@ -328,7 +334,7 @@ public class ExtractionListener implements Listener {
                     updateBeaconColor(zone, Material.RED_STAINED_GLASS, Material.RED_STAINED_GLASS);
 
                     BossBar downBar = Bukkit.createBossBar(
-                            ChatColor.RED + "Extraction down for " + zoneDownSeconds + "s",
+                            "§cExtraction is down for §c§l" + zoneDownSeconds + " §cseconds...",
                             BarColor.RED,
                             BarStyle.SOLID
                     );
@@ -361,13 +367,13 @@ public class ExtractionListener implements Listener {
                                 return;
                             }
                             downBar.setProgress((double) downTimeLeft / zoneDownSeconds);
-                            downBar.setTitle(ChatColor.RED + "Extraction down for " + downTimeLeft + "s");
+                            downBar.setTitle("§cExtraction is down for §c§l" + downTimeLeft + " §cseconds...");
                             downTimeLeft--;
                         }
                     }.runTaskTimer(plugin, 0L, 20L);
                 } else {
                     portalBar.setProgress((double) timeLeft / portalOpenSeconds);
-                    portalBar.setTitle(ChatColor.AQUA + "Portal open for " + timeLeft + "s");
+                    portalBar.setTitle("§aPortal is open for §a§l" + timeLeft + " §aseconds...");
                     timeLeft--;
                 }
             }

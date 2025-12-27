@@ -34,8 +34,8 @@ public class BlizzardWeather implements WeatherEffect {
         world.setThundering(false);
 
         for (Player player : world.getPlayers()) {
-            player.sendMessage(ChatColor.AQUA +
-                    "❄ A blizzard is moving in! Find heat or you will freeze!");
+            player.sendMessage(
+                    "§b§l(§f§b❄§b§l) §f§cA blizzard is moving in! Find heat or you will freeze!");
         }
     }
 
@@ -137,8 +137,8 @@ public class BlizzardWeather implements WeatherEffect {
         world.setStorm(false);
 
         for (Player player : world.getPlayers()) {
-            player.sendMessage(ChatColor.GREEN +
-                    "The blizzard subsides. You feel warmer.");
+            player.sendMessage(
+                    "§b§l(§f§b❄§b§l) §f§aThe blizzard subsides. You feel warmer.");
         }
     }
 }

@@ -43,7 +43,9 @@ public class BroadcastTask implements Runnable {
                 String msg = plugin.getConfig().getString("broadcast.new-map-message");
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
                 // Apply penalty
-                plugin.getPenaltyManager().applyPenalty(rotation.getCurrentWorld().getId());
+//                plugin.getPenaltyManager().applyPenalty(rotation.getCurrentWorld().getId());
+                plugin.getPenaltyManager().applyPenalty(currentMap);
+                plugin.getLogger().info("Applying penalty on " + currentMap + " " + nextMap);
                 hasBroadcasted = false; // Allow broadcast for next map
             }
     }

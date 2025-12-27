@@ -35,7 +35,7 @@ public class GuiListener implements Listener {
         if (event.getCurrentItem().getType() == Material.PLAYER_HEAD) {
             // Teleport with BetterRTP
             String currentWorld = plugin.getRotationManager().getCurrentWorldName();
-            Bukkit.dispatchCommand(player, "rtp world " + currentWorld);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + player.getName() + " " + currentWorld);
             player.closeInventory();
         }
     }
