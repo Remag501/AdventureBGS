@@ -50,29 +50,34 @@ public class PenaltyManager {
                 plugin.getLogger().warning("Invalid sound in config: " + soundName);
             }
 
-            // Apply Wither
-            player.addPotionEffect(new PotionEffect(
-                    PotionEffectType.WITHER,
-                    Integer.MAX_VALUE, // Permanent
-                    3,
-                    false,
-                    false,
-                    true
-            ));
-            // Apply Blindness
-            player.addPotionEffect(new PotionEffect(
-                    PotionEffectType.BLINDNESS,
-                    Integer.MAX_VALUE, // Permanent
-                    1,
-                    false,
-                    false,
-                    true
-            ));
+            penalizePlayer(player);
+
         }
 
         // Kill any players who logged out
         updateWorldVersion(Bukkit.getWorld(closedWorldName));
 
+    }
+
+    public void penalizePlayer(Player player) {
+        // Apply Wither
+        player.addPotionEffect(new PotionEffect(
+                PotionEffectType.WITHER,
+                Integer.MAX_VALUE, // Permanent
+                3,
+                false,
+                false,
+                true
+        ));
+        // Apply Blindness
+        player.addPotionEffect(new PotionEffect(
+                PotionEffectType.BLINDNESS,
+                Integer.MAX_VALUE, // Permanent
+                1,
+                false,
+                false,
+                true
+        ));
     }
 
     public void updateWorldVersion(World world) {

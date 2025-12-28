@@ -15,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.UUID;
 
 public class JoinListener implements Listener {
-    private final JavaPlugin plugin;
+    private final AdventureBGS plugin;
     private final DeathManager deathManager;
 
     public JoinListener(AdventureBGS plugin) {
@@ -39,8 +39,8 @@ public class JoinListener implements Listener {
         // 3. Compare
         if (playerVersion < worldVersion) {
             // They were here before the last regeneration
-            player.setHealth(0);
-            player.sendMessage("§cThe map regenerated while you were away!");
+            player.sendMessage("§c§l(!) §cYou left the map before extracting!");
+            plugin.getPenaltyManager().penalizePlayer(player);
 
             // Update their version so they don't die again until the next reset
             player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, worldVersion);

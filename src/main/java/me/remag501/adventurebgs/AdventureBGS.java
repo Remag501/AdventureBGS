@@ -66,18 +66,6 @@ public class AdventureBGS extends JavaPlugin {
         // Cleanup if needed
     }
 
-    public BroadcastTask getBroadcastTask() {
-        return broadcastTask;
-    }
-
-    public DeathManager getDeathManager() {
-        return deathManager;
-    }
-
-    public RotationManager getRotationManager() {
-        return rotationManager;
-    }
-
     private void preloadWorlds() {
         for (String worldName : rotationManager.getWorlds()) {
             World world = Bukkit.getWorld(worldName);
@@ -95,6 +83,18 @@ public class AdventureBGS extends JavaPlugin {
         extractionManager = new ExtractionManager(this);
 //        guiManager = new GuiManager(this); // Empty constructor, no need for re init
 //        penaltyManager = new PenaltyManager(this); // No config in constructor, no need for re init
+    }
+
+    public BroadcastTask getBroadcastTask() {
+        return broadcastTask;
+    }
+
+    public DeathManager getDeathManager() {
+        return deathManager;
+    }
+
+    public RotationManager getRotationManager() {
+        return rotationManager;
     }
 
     public PenaltyManager getPenaltyManager() {
