@@ -58,15 +58,21 @@ public class RotationManager {
     }
 
     public long getMinutesUntilNextCycle() {
+        long secondsLeft = getSecondsUntilNextCycle();
+
+        return secondsLeft / 60; // floor to minutes
+    }
+
+    public long getSecondsUntilNextCycle() {
         Instant now = Instant.now();
         long secondsSinceStart = Duration.between(startCycle, now).getSeconds();
         long cycleSeconds = cycleMinutes * 60L;
 
         long secondsIntoCycle = secondsSinceStart % cycleSeconds;
-        long secondsLeft = cycleSeconds - secondsIntoCycle;
 
-        return secondsLeft / 60; // floor to minutes
+        return cycleSeconds - secondsIntoCycle; // floor to minutes
     }
+
 
     public boolean isNewCycle() {
         Instant now = Instant.now();

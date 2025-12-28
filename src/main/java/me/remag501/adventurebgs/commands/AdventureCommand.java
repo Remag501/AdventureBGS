@@ -1,10 +1,19 @@
 package me.remag501.adventurebgs.commands;
 
+import com.github.sirblobman.api.configuration.PlayerDataManager;
+import com.github.sirblobman.combatlogx.api.ICombatLogX;
 import me.remag501.adventurebgs.AdventureBGS;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdventureCommand implements CommandExecutor {
 

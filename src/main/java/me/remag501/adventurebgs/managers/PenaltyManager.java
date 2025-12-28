@@ -1,29 +1,43 @@
 package me.remag501.adventurebgs.managers;
 
+import com.github.sirblobman.api.configuration.PlayerDataManager;
+import com.github.sirblobman.combatlogx.api.ICombatLogX;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 public class PenaltyManager {
 
     private AdventureBGS plugin;
-    private BroadcastTask broadcastTask;
+    private final BroadcastTask broadcastTask;
+    private final DeathManager deathManager;
 
-    public PenaltyManager(AdventureBGS plugin) {
+
+    public PenaltyManager(AdventureBGS plugin, BroadcastTask broadcastTask) {
         this.plugin = plugin;
-        this.broadcastTask = new BroadcastTask(plugin);
+        this.broadcastTask = broadcastTask;
+        this.deathManager = plugin.getDeathManager();
     }
 
     public void applyPenalty(String closedWorldName) {
         String penaltyMsg = plugin.getConfig().getString("penalty.message");
         String soundName = plugin.getConfig().getString("penalty.sound");
 
+        plugin.getLogger().info("Withering the world: " + closedWorldName);
+
+        // Wither away online players
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!player.getWorld().getName().equals(closedWorldName)) continue;
 
@@ -57,6 +71,18 @@ public class PenaltyManager {
                     true
             ));
         }
+
+        // Kill any players who logged out
+        updateWorldVersion(Bukkit.getWorld(closedWorldName));
+
+    }
+
+    public void updateWorldVersion(World world) {
+        NamespacedKey key = new NamespacedKey(plugin, "map_version");
+        int currentVersion = world.getPersistentDataContainer().getOrDefault(key, PersistentDataType.INTEGER, 0);
+
+        // Increment the version so old player "tickets" become invalid
+        world.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, currentVersion + 1);
     }
 
     public void startBroadcastTask() {

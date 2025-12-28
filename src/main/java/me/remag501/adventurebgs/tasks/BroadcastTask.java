@@ -2,52 +2,176 @@ package me.remag501.adventurebgs.tasks;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 
 public class BroadcastTask implements Runnable {
 
-    private AdventureBGS plugin;
-    private boolean hasBroadcasted;
-    public BroadcastTask (AdventureBGS plugin) {
+    private final AdventureBGS plugin;
+
+    private boolean hasBroadcasted = false;
+    private BukkitRunnable warningTask;
+    private BossBar warningBossBar;
+
+    public BroadcastTask(AdventureBGS plugin) {
         this.plugin = plugin;
-        hasBroadcasted = false;
     }
 
     @Override
     public void run() {
-            RotationManager rotation = plugin.getRotationManager();
+        RotationManager rotation = plugin.getRotationManager();
 
-            long minutesLeft = rotation.getMinutesUntilNextCycle();
-            String currentMap = rotation.getCurrentWorld().getChatName();
-            String nextMap = rotation.getNextWorld().getChatName();
+        long minutesLeft = rotation.getMinutesUntilNextCycle();
+        long warnMinutes = plugin.getConfig().getLong("broadcast.warn-minutes");
 
-            // Warning
-            long warnMinutes = plugin.getConfig().getLong("broadcast.warn-minutes");
-            if (minutesLeft == warnMinutes && !hasBroadcasted) {
-                String msg = plugin.getConfig().getString("broadcast.warn-message");
-                Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
-                // Run through all world commands
-                List<String> commands = rotation.getNextWorld().getCommands();
-                for (String command: commands) {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        String currentMap = rotation.getCurrentWorld().getChatName();
+        String nextMap = rotation.getNextWorld().getChatName();
+
+        long secondsLeft = rotation.getSecondsUntilNextCycle();
+        long warnSeconds = plugin.getConfig().getLong("broadcast.warn-minutes") * 60;
+
+        // =======================
+        // WARNING PHASE
+        // =======================
+        if (secondsLeft <= warnSeconds && secondsLeft > warnSeconds - 20 && !hasBroadcasted) {
+
+            String msg = plugin.getConfig().getString("broadcast.warn-message");
+            String formattedMsg = MessageUtil.format(msg, currentMap, nextMap, minutesLeft);
+            String broadcastMsg = MessageUtil.color(rotation.getCurrentWorld().getChatName()) + " §fcloses in §c" + warnMinutes + " §fminutes...";
+            Bukkit.broadcastMessage(formattedMsg);
+            World currentWorld = Bukkit.getWorld(rotation.getCurrentWorld().getId());
+
+            // Make warning into a title bar
+            if (currentWorld != null) {
+                for (Player player : currentWorld.getPlayers()) {
+                    // sendTitle(title, subtitle, fadeIn, stay, fadeOut)
+                    // Using the message as the main title, and an empty string for subtitle
+                    player.sendTitle(
+                            broadcastMsg,
+                            "",
+                            10, // 0.5s fade in
+                            70, // 3.5s stay
+                            20  // 1.0s fade out
+                    );
                 }
-
-                hasBroadcasted = true;
             }
 
-            // New map event (detect cycle boundary)
-            if (rotation.isNewCycle()) {
-                String msg = plugin.getConfig().getString("broadcast.new-map-message");
-                Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, minutesLeft));
-                // Apply penalty
-//                plugin.getPenaltyManager().applyPenalty(rotation.getCurrentWorld().getId());
-                plugin.getPenaltyManager().applyPenalty(currentMap);
-                plugin.getLogger().info("Applying penalty on " + currentMap + " " + nextMap);
-                hasBroadcasted = false; // Allow broadcast for next map
+            // Run next-world commands
+            List<String> commands = rotation.getNextWorld().getCommands();
+            for (String command : commands) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
             }
+
+            startWarningCountdown(rotation);
+            hasBroadcasted = true;
+        }
+
+        // =======================
+        // ROTATION OCCURRED
+        // =======================
+        if (rotation.isNewCycle()) {
+
+            String msg = plugin.getConfig().getString("broadcast.new-map-message");
+            Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
+
+            stopWarningCountdown();
+            hasBroadcasted = false;
+        }
     }
 
+    // =======================
+    // WARNING COUNTDOWN
+    // =======================
+    private void startWarningCountdown(RotationManager rotation) {
+
+        long totalSeconds = rotation.getSecondsUntilNextCycle();
+
+        WorldInfo worldInfo = rotation.getCurrentWorld();
+        World world = Bukkit.getWorld(worldInfo.getId());
+        if (world == null) return;
+
+        warningBossBar = Bukkit.createBossBar(
+                "Map closes in " + totalSeconds + "s",
+                BarColor.RED,
+                BarStyle.SOLID
+        );
+
+        // Add existing players
+        world.getPlayers().forEach(warningBossBar::addPlayer);
+
+        warningTask = new BukkitRunnable() {
+            long timeLeft = totalSeconds;
+
+            @Override
+            public void run() {
+
+                if (timeLeft <= 0 || rotation.isNewCycle()) {
+                    // Apply penalty to OLD map
+                    stopWarningCountdown();
+                    return;
+                }
+
+                if (timeLeft > 180 )
+                    warningBossBar.hide();
+                else if (timeLeft >= 120) {
+                    warningBossBar.show();
+                    warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l2 §cminutes...");
+                    warningBossBar.setProgress(1);
+//                    warningBossBar.setProgress(Math.max(0.0, (double) timeLeft / totalSeconds));
+                } else if (timeLeft >= 60) {
+                    warningBossBar.show();
+                    warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l1 §cminute...");
+                    warningBossBar.setProgress(1);
+//                    warningBossBar.setProgress(Math.max(0.0, (double) timeLeft / totalSeconds));
+                } else {
+                    warningBossBar.show();
+                    warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l" + timeLeft + " §cseconds...");
+                    warningBossBar.setProgress(1);
+//                    warningBossBar.setProgress(Math.max(0.0, (double) timeLeft / totalSeconds));
+                }
+
+                timeLeft--;
+            }
+        };
+
+        warningTask.runTaskTimer(plugin, 0L, 20L);
+
+
+        // Apply penalty after warning ticks
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                plugin.getPenaltyManager().applyPenalty(world.getName());
+            }
+        }.runTaskLater(plugin, totalSeconds * 20L);
+    }
+
+    private void stopWarningCountdown() {
+        if (warningTask != null) {
+            warningTask.cancel();
+            warningTask = null;
+        }
+
+        if (warningBossBar != null) {
+            warningBossBar.removeAll();
+            warningBossBar = null;
+        }
+    }
+
+    // =======================
+    // ACCESS FOR LISTENER
+    // =======================
+    public BossBar getWarningBossBar() {
+        return warningBossBar;
+    }
 }

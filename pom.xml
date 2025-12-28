@@ -62,6 +62,10 @@
             <id>sk89q-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
+        <repository>
+            <id>sirblobman-public</id>
+            <url>https://nexus.sirblobman.xyz/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -77,5 +81,27 @@
             <version>7.0.8</version>
             <scope>provided</scope>
         </dependency>
+<!--         BlueSlimeCore -->
+<!--         Use the exact version string from their documentation -->
+        <dependency>
+            <groupId>com.github.sirblobman.api</groupId>
+            <artifactId>core</artifactId>
+            <version>2.9-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.sirblobman.combatlogx</groupId>
+            <artifactId>api</artifactId>
+            <version>11.6-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.sirblobman.combatlogx.expansion</groupId>
+            <artifactId>newbie-helper</artifactId>
+            <version>11.6-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
+
+
