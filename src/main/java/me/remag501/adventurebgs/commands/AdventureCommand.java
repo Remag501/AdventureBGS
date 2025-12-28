@@ -1,7 +1,5 @@
 package me.remag501.adventurebgs.commands;
 
-import com.github.sirblobman.api.configuration.PlayerDataManager;
-import com.github.sirblobman.combatlogx.api.ICombatLogX;
 import me.remag501.adventurebgs.AdventureBGS;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

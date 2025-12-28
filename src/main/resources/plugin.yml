@@ -11,4 +11,4 @@ commands:
 depend:
   - Multiverse-Core
   - BetterRTP
-  - CombatLogX
+  - PlaceholderAPI

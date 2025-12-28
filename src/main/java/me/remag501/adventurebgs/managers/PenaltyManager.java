@@ -1,7 +1,5 @@
 package me.remag501.adventurebgs.managers;
 
-import com.github.sirblobman.api.configuration.PlayerDataManager;
-import com.github.sirblobman.combatlogx.api.ICombatLogX;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;

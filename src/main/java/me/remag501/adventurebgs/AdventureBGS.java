@@ -6,6 +6,7 @@ import me.remag501.adventurebgs.listeners.ExtractionListener;
 import me.remag501.adventurebgs.listeners.GuiListener;
 import me.remag501.adventurebgs.listeners.JoinListener;
 import me.remag501.adventurebgs.managers.*;
+import me.remag501.adventurebgs.placeholder.BGSExpansion;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,6 +23,8 @@ public class AdventureBGS extends JavaPlugin {
     private WeatherManager weatherManager;
     private BroadcastTask broadcastTask;
     private DeathManager deathManager;
+    private BGSExpansion bgsExpansion;
+
 
     @Override
     public void onEnable() {
@@ -50,6 +53,12 @@ public class AdventureBGS extends JavaPlugin {
 
         // Start broadcasting messages
         penaltyManager.startBroadcastTask();
+
+        // Register placeholder
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new BGSExpansion(this).register();
+            getLogger().info("AdventureBGS Placeholders registered!");
+        }
     }
 
     @Override
@@ -99,6 +108,10 @@ public class AdventureBGS extends JavaPlugin {
     public GuiManager getGuiManager() {
         return guiManager;
     }
+
+//    public B getPlaceholderService() {
+//        return placeholderService;
+//    }
 
     public WeatherManager getWeatherManager() {
         return weatherManager;
