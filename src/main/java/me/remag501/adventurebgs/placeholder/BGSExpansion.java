@@ -47,7 +47,9 @@ public class BGSExpansion extends PlaceholderExpansion {
             case "current_world_chat" -> MessageUtil.color(rotation.getCurrentWorld().getChatName());
             case "next_world_chat" -> MessageUtil.color(rotation.getNextWorld().getChatName());
             case "current_world_gui" -> MessageUtil.color(rotation.getCurrentWorld().getGuiName());
+            case "current_world_id" -> MessageUtil.color(rotation.getCurrentWorld().getId());
             case "next_world_gui" -> MessageUtil.color(rotation.getNextWorld().getGuiName());
+            case "next_world_id" -> MessageUtil.color(rotation.getNextWorld().getId());
             case "time_left" -> {
                 long totalSeconds = rotation.getSecondsUntilNextCycle();
 
