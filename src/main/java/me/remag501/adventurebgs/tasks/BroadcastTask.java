@@ -1,5 +1,6 @@
 package me.remag501.adventurebgs.tasks;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.WorldInfo;
@@ -66,10 +67,13 @@ public class BroadcastTask implements Runnable {
             }
 
             // Run next-world commands
-            List<String> commands = rotation.getNextWorld().getCommands();
-            for (String command : commands) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-            }
+//            List<String> commands = rotation.getNextWorld().getCommands();
+//            for (String command : commands) {
+//                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+//            }
+
+            // Run next-world commands
+            runWorldCommands(null, rotation.getNextWorld());
 
             startWarningCountdown(rotation);
             hasBroadcasted = true;
@@ -85,6 +89,20 @@ public class BroadcastTask implements Runnable {
 
             stopWarningCountdown();
             hasBroadcasted = false;
+        }
+    }
+
+    private void runWorldCommands(Player player, WorldInfo world) {
+        // 1. Get the raw list from the object
+        List<String> rawCommands = world.getCommands();
+
+        for (String rawCommand : rawCommands) {
+            // 2. Parse the placeholders RIGHT NOW
+            String processedCommand = PlaceholderAPI.setPlaceholders(player, rawCommand);
+
+            // 3. Execute the command
+            // Note: Use dispatchCommand for console or player.chat() for player
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCommand);
         }
     }
 
