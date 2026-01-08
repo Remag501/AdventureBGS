@@ -23,21 +23,24 @@ public class AdventureBGS extends JavaPlugin {
     private WeatherManager weatherManager;
     private BroadcastTask broadcastTask;
     private DeathManager deathManager;
-    private BGSExpansion bgsExpansion;
+
+    private AdventureSettings settings;
 
 
     @Override
     public void onEnable() {
+        // Config stuff
         saveDefaultConfig();
+        this.settings = new AdventureSettings(getConfig());
 
         // Initialize managers
-        rotationManager = new RotationManager(this);
         broadcastTask = new BroadcastTask(this);
-        guiManager = new GuiManager(this);
-        extractionManager = new ExtractionManager(this);
-        penaltyManager = new PenaltyManager(this, broadcastTask);
-        weatherManager = new WeatherManager(this);
         deathManager = new DeathManager(this);
+        weatherManager = new WeatherManager(this);
+        penaltyManager = new PenaltyManager(this, broadcastTask);
+        extractionManager = new ExtractionManager(settings);
+        rotationManager = new RotationManager(settings);
+        guiManager = new GuiManager(rotationManager, settings);
 
         // Preload all configured worlds
         preloadWorlds();
@@ -78,11 +81,7 @@ public class AdventureBGS extends JavaPlugin {
     }
 
     public void reloadPluginConfig() {
-        reloadConfig(); // Reloads config.yml for spigot
-        rotationManager = new RotationManager(this);
-        extractionManager = new ExtractionManager(this);
-//        guiManager = new GuiManager(this); // Empty constructor, no need for re init
-//        penaltyManager = new PenaltyManager(this); // No config in constructor, no need for re init
+
     }
 
     public BroadcastTask getBroadcastTask() {
@@ -109,11 +108,11 @@ public class AdventureBGS extends JavaPlugin {
         return guiManager;
     }
 
-//    public B getPlaceholderService() {
-//        return placeholderService;
-//    }
-
     public WeatherManager getWeatherManager() {
         return weatherManager;
+    }
+
+    public AdventureSettings getSettings() {
+        return settings;
     }
 }

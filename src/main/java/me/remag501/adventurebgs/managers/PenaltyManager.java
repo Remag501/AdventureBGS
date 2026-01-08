@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.AdventureSettings;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.*;
@@ -18,20 +19,20 @@ import java.util.UUID;
 
 public class PenaltyManager {
 
-    private AdventureBGS plugin;
+    private final AdventureBGS plugin;
     private final BroadcastTask broadcastTask;
-    private final DeathManager deathManager;
+    private final AdventureSettings settings;
 
 
     public PenaltyManager(AdventureBGS plugin, BroadcastTask broadcastTask) {
         this.plugin = plugin;
         this.broadcastTask = broadcastTask;
-        this.deathManager = plugin.getDeathManager();
+        this.settings = plugin.getSettings();
     }
 
     public void applyPenalty(String closedWorldName) {
-        String penaltyMsg = plugin.getConfig().getString("penalty.message");
-        String soundName = plugin.getConfig().getString("penalty.sound");
+        String penaltyMsg = settings.getPenaltyMessage();
+        String soundName = settings.getPenaltySound();
 
         plugin.getLogger().info("Withering the world: " + closedWorldName);
 

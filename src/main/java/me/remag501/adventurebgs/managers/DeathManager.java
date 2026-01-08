@@ -1,5 +1,6 @@
 package me.remag501.adventurebgs.managers;
 
+import me.remag501.adventurebgs.AdventureBGS;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -15,13 +16,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class DeathManager {
-    private final JavaPlugin plugin;
     private final File file;
     private final FileConfiguration config;
     private final Set<UUID> pendingDeaths;
 
-    public DeathManager(JavaPlugin plugin) {
-        this.plugin = plugin;
+    public DeathManager(AdventureBGS plugin) {
         this.file = new File(plugin.getDataFolder(), "pending_deaths.yml");
         this.config = YamlConfiguration.loadConfiguration(file);
         this.pendingDeaths = new HashSet<>();

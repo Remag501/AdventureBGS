@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.AdventureSettings;
 import me.remag501.adventurebgs.model.WeatherModel;
 import me.remag501.adventurebgs.weather.BlizzardWeather;
 import me.remag501.adventurebgs.weather.WeatherEffect;
@@ -20,29 +21,15 @@ public class WeatherManager {
     );
 
     private final AdventureBGS plugin;
-    private final List<WeatherModel> weathers = new ArrayList<>();
+    private final List<WeatherModel> weathers;
 
     public WeatherManager(AdventureBGS plugin) {
         this.plugin = plugin;
-        loadWeather();
+        AdventureSettings settings = plugin.getSettings();
+        weathers = settings.getWeatherModels();
         startScheduling();
     }
 
-    private void loadWeather() {
-        List<Map<?, ?>> list = plugin.getConfig().getMapList("weather");
-
-        for (Map<?, ?> map : list) {
-            WeatherModel model = new WeatherModel(
-                    (String) map.get("type"),
-                    (String) map.get("world"),
-                    (int) map.get("min_duration"),
-                    (int) map.get("max_duration"),
-                    (int) map.get("min_frequency"),
-                    (int) map.get("max_frequency")
-            );
-            weathers.add(model);
-        }
-    }
 
     private void startScheduling() {
         for (WeatherModel model : weathers) {

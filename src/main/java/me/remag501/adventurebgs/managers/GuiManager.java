@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.AdventureSettings;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
 import me.remag501.adventurebgs.util.SkullUtil;
@@ -18,30 +19,32 @@ import java.util.stream.Collectors;
 
 public class GuiManager {
 
-    private AdventureBGS plugin;
+    private final AdventureSettings settings;
+    private final RotationManager rotationManager;
 
-    public GuiManager (AdventureBGS plugin) {
-        this.plugin = plugin;
+    public GuiManager (RotationManager manager, AdventureSettings settings) {
+        this.rotationManager = manager;
+        this.settings = settings;
     }
 
     public void openAdventureGUI(Player player) {
-        String currentWorld = plugin.getRotationManager().getCurrentWorld().getGuiName();
-        String nextWorld = plugin.getRotationManager().getNextWorld().getGuiName();
-        long minutesLeft = plugin.getRotationManager().getMinutesUntilNextCycle();
+        String currentWorld = rotationManager.getCurrentWorld().getGuiName();
+        String nextWorld = rotationManager.getNextWorld().getGuiName();
+        long minutesLeft = rotationManager.getMinutesUntilNextCycle();
 
         // GUI Title
-        String guiTitle = MessageUtil.color(plugin.getConfig().getString("gui.title"));
+        String guiTitle = MessageUtil.color(settings.getGuiTitle());
 
         Inventory gui = Bukkit.createInventory(null, 36, guiTitle);
 
         // --- Teleport Item ---
-        WorldInfo currentInfo = plugin.getRotationManager().getCurrentWorld();
+        WorldInfo currentInfo = rotationManager.getCurrentWorld();
 
-        int tpSlot = plugin.getConfig().getInt("gui.teleport.slot", 13);
-        String tpName = plugin.getConfig().getString("gui.teleport.name")
+        int tpSlot = settings.getGuiTeleportSlot();
+        String tpName = settings.getGuiTeleportName()
                 .replace("%current_world%", currentWorld);
 
-        List<String> tpLore = plugin.getRotationManager().getCurrentWorld().getLore()
+        List<String> tpLore = rotationManager.getCurrentWorld().getLore()
                 .stream()
                 .map(line -> line.replace("%current_world%", currentWorld))
                 .map(MessageUtil::color)
@@ -58,10 +61,10 @@ public class GuiManager {
         gui.setItem(tpSlot, teleportItem);
 
         // --- Info (Clock) Item ---
-        int infoSlot = plugin.getConfig().getInt("gui.info.slot", 22);
-        String infoName = plugin.getConfig().getString("gui.info.name");
+        int infoSlot = settings.getGuiInfoSlot();
+        String infoName = settings.getGuiInfoName();
 
-        List<String> infoLore = plugin.getConfig().getStringList("gui.info.lore")
+        List<String> infoLore = settings.getGuiInfoLore()
                 .stream()
                 .map(line -> line.replace("%minutes_left%", String.valueOf(minutesLeft)))
                 .map(line -> line.replace("%next_world%", nextWorld))
