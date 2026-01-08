@@ -19,7 +19,8 @@ import java.util.stream.Collectors;
 
 public class GuiManager {
 
-    private final AdventureSettings settings;
+    private AdventureSettings settings;
+
     private final RotationManager rotationManager;
 
     public GuiManager (RotationManager manager, AdventureSettings settings) {
@@ -80,6 +81,10 @@ public class GuiManager {
         gui.setItem(infoSlot, clockItem);
 
         player.openInventory(gui);
+    }
+
+    public void reloadSettings(AdventureSettings settings) {
+        this.settings = settings;
     }
 
 

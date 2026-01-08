@@ -14,11 +14,17 @@ import java.util.Map;
 public class RotationManager {
 
 //    private final List<String> worlds;
-    private final List<WorldInfo> worlds;
-    private final int cycleMinutes;
-    private final Instant startCycle;
+    private List<WorldInfo> worlds;
+    private int cycleMinutes;
+    private Instant startCycle;
 
     public RotationManager(AdventureSettings settings) {
+        this.cycleMinutes = settings.getCycleMinutes();
+        this.worlds = settings.getWorlds();
+        this.startCycle = settings.getStartCycle();
+    }
+
+    public void reloadSettings(AdventureSettings settings) {
         this.cycleMinutes = settings.getCycleMinutes();
         this.worlds = settings.getWorlds();
         this.startCycle = settings.getStartCycle();

@@ -25,13 +25,15 @@ public class AdventureBGS extends JavaPlugin {
     private DeathManager deathManager;
 
     private AdventureSettings settings;
+    private SettingsProvider provider;
 
 
     @Override
     public void onEnable() {
         // Config stuff
         saveDefaultConfig();
-        this.settings = new AdventureSettings(getConfig());
+        this.provider = new SettingsProvider(this);
+        this.settings = provider.getSettings();
 
         // Initialize managers
         broadcastTask = new BroadcastTask(this);
@@ -69,6 +71,18 @@ public class AdventureBGS extends JavaPlugin {
         // Cleanup if needed
     }
 
+    public void reloadPluginConfig() {
+        provider.updateConfig(this);
+        this.settings = provider.getSettings();
+
+        // Change to update managers instead
+        penaltyManager.reloadSettings();
+        extractionManager.reloadSettings(settings);
+        guiManager.reloadSettings(settings);
+        rotationManager.reloadSettings(settings);
+
+    }
+
     private void preloadWorlds() {
         for (String worldName : rotationManager.getWorlds()) {
             World world = Bukkit.getWorld(worldName);
@@ -78,10 +92,6 @@ public class AdventureBGS extends JavaPlugin {
                 getLogger().info("Preloaded world: " + worldName);
             }
         }
-    }
-
-    public void reloadPluginConfig() {
-
     }
 
     public BroadcastTask getBroadcastTask() {

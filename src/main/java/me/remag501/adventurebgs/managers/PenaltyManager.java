@@ -21,12 +21,17 @@ public class PenaltyManager {
 
     private final AdventureBGS plugin;
     private final BroadcastTask broadcastTask;
-    private final AdventureSettings settings;
+
+    private AdventureSettings settings;
 
 
     public PenaltyManager(AdventureBGS plugin, BroadcastTask broadcastTask) {
         this.plugin = plugin;
         this.broadcastTask = broadcastTask;
+        this.settings = plugin.getSettings();
+    }
+
+    public void reloadSettings() {
         this.settings = plugin.getSettings();
     }
 

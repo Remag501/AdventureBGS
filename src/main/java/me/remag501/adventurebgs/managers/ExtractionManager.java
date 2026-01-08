@@ -10,9 +10,13 @@ import java.util.*;
 
 public class ExtractionManager {
 
-    private final AdventureSettings settings;
+    private AdventureSettings settings;
 
     public ExtractionManager(AdventureSettings settings) {
+        this.settings = settings;
+    }
+
+    public void reloadSettings(AdventureSettings settings) {
         this.settings = settings;
     }
 
