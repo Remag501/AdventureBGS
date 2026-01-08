@@ -2,6 +2,7 @@ package me.remag501.adventurebgs.tasks;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.AdventureSettings;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
@@ -30,22 +31,23 @@ public class BroadcastTask implements Runnable {
     @Override
     public void run() {
         RotationManager rotation = plugin.getRotationManager();
+        AdventureSettings settings = plugin.getSettings();
 
         long minutesLeft = rotation.getMinutesUntilNextCycle();
-        long warnMinutes = plugin.getConfig().getLong("broadcast.warn-minutes");
+        long warnMinutes = settings.getWarnMinutes();
 
         String currentMap = rotation.getCurrentWorld().getChatName();
         String nextMap = rotation.getNextWorld().getChatName();
 
         long secondsLeft = rotation.getSecondsUntilNextCycle();
-        long warnSeconds = plugin.getConfig().getLong("broadcast.warn-minutes") * 60;
+        long warnSeconds = warnMinutes * 60;
 
         // =======================
         // WARNING PHASE
         // =======================
         if (secondsLeft <= warnSeconds && secondsLeft > warnSeconds - 20 && !hasBroadcasted) {
 
-            String msg = plugin.getConfig().getString("broadcast.warn-message");
+            String msg = settings.getWarnMessage();
             String formattedMsg = MessageUtil.format(msg, currentMap, nextMap, minutesLeft);
             String broadcastMsg = MessageUtil.color(rotation.getCurrentWorld().getChatName()) + " §fcloses in §c" + warnMinutes + " §fminutes...";
             Bukkit.broadcastMessage(formattedMsg);
@@ -67,12 +69,6 @@ public class BroadcastTask implements Runnable {
             }
 
             // Run next-world commands
-//            List<String> commands = rotation.getNextWorld().getCommands();
-//            for (String command : commands) {
-//                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-//            }
-
-            // Run next-world commands
             runWorldCommands(null, rotation.getNextWorld());
 
             startWarningCountdown(rotation);
@@ -84,7 +80,7 @@ public class BroadcastTask implements Runnable {
         // =======================
         if (rotation.isNewCycle()) {
 
-            String msg = plugin.getConfig().getString("broadcast.new-map-message");
+            String msg = settings.getNewMapMessage();
             Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
 
             stopWarningCountdown();

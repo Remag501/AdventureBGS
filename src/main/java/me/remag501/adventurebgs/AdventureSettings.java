@@ -32,8 +32,16 @@ public class AdventureSettings {
 
     // Extraction
     private final int extractionDuration;
+    private final int portalOpenSeconds;
+    private final int downSeconds;
     private final Location extractionSpawn;
-    private final Map<String, String> extractionMessages = new HashMap<>();
+    private final String extractionStart;
+    private final String extractionBossTitle;
+    private final String extractionSuccess;
+    private final String extractionPortalOpen;
+    private final String extractionDown;
+    private final String extractionCancel;
+//    private final Map<String, String> extractionMessages = new HashMap<>();
     private final Map<String, List<ExtractionZone>> extractionZones = new HashMap<>();
 
     // Alert Settings
@@ -60,19 +68,25 @@ public class AdventureSettings {
         this.cycleMinutes = config.getInt("rotation.cycle-minutes");
         this.startCycle = Instant.parse(config.getString("rotation.start-cycle", "2025-01-01T00:00:00Z"));
 
-        ConfigurationSection worldsSec = config.getConfigurationSection("rotation.worlds");
-        if (worldsSec != null) {
-            for (String key : worldsSec.getKeys(false)) {
-                ConfigurationSection w = worldsSec.getConfigurationSection(key);
-                worlds.add(new WorldInfo(
-                        w.getString("id"),
-                        w.getString("texture"),
-                        color(w.getString("chat-name")),
-                        color(w.getString("gui-name")),
-                        colorList(w.getStringList("lore")),
-                        w.getStringList("commands")
-                ));
+        List<Map<?, ?>> worldsList = config.getMapList("rotation.worlds");
+
+        if (worldsList != null && !worldsList.isEmpty()) {
+            for (Map<?, ?> map : worldsList) {
+                // Since it's a list of maps, we pull values directly from the map
+                String id = (String) map.get("id");
+                String texture = (String) map.get("texture");
+                String chatName = color((String) map.get("chat-name"));
+                String guiName = color((String) map.get("gui-name"));
+
+                // Handle Lists safely
+                List<String> lore = colorList((List<String>) map.get("lore"));
+                List<String> commands = (List<String>) map.get("commands");
+
+                worlds.add(new WorldInfo(id, texture, chatName, guiName, lore, commands));
+                Bukkit.getLogger().info("Successfully loaded world: " + id);
             }
+        } else {
+            Bukkit.getLogger().warning("Rotation worlds list is null or empty!");
         }
 
         // --- Broadcast & Penalty ---
@@ -84,6 +98,8 @@ public class AdventureSettings {
 
         // --- Extraction ---
         this.extractionDuration = config.getInt("extraction.duration");
+        this.portalOpenSeconds = config.getInt("extraction.portal-open-seconds");
+        this.downSeconds = config.getInt("extraction.down-seconds");
         this.extractionSpawn = new Location(
                 Bukkit.getWorld(config.getString("extraction.spawn.world")),
                 config.getDouble("extraction.spawn.x"),
@@ -91,12 +107,13 @@ public class AdventureSettings {
                 config.getDouble("extraction.spawn.z")
         );
 
-        ConfigurationSection msgSec = config.getConfigurationSection("extraction.message");
-        if (msgSec != null) {
-            for (String key : msgSec.getKeys(false)) {
-                extractionMessages.put(key, color(msgSec.getString(key)));
-            }
-        }
+        // Extraction messages
+        this.extractionStart = config.getString("extraction.message.start");
+        this.extractionBossTitle = config.getString("extraction.message.boss-title");
+        this.extractionSuccess = config.getString("extraction.message.success");
+        this.extractionPortalOpen = config.getString("extraction.message.portal-open");
+        this.extractionDown = config.getString("extraction.message.down");
+        this.extractionCancel = config.getString("extraction.message.cancel");
 
         // Parse Extraction Zones
         ConfigurationSection zonesSec = config.getConfigurationSection("extraction.zones");
@@ -192,7 +209,6 @@ public class AdventureSettings {
     public List<WorldInfo> getWorlds() { return worlds; }
     public List<WeatherModel> getWeatherModels() { return weatherModels; }
     public List<ExtractionZone> getZonesForWorld(String worldId) { return extractionZones.getOrDefault(worldId, Collections.emptyList()); }
-    public String getExtractionMessage(String key) { return extractionMessages.getOrDefault(key, ""); }
 
     // Remaining getters
 
@@ -232,8 +248,28 @@ public class AdventureSettings {
         return extractionSpawn;
     }
 
-    public Map<String, String> getExtractionMessages() {
-        return extractionMessages;
+    public String getExtractionStart() {
+        return extractionStart;
+    }
+
+    public String getExtractionBossTitle() {
+        return extractionBossTitle;
+    }
+
+    public String getExtractionSuccess() {
+        return extractionSuccess;
+    }
+
+    public String getExtractionPortalOpen() {
+        return extractionPortalOpen;
+    }
+
+    public String getExtractionDown() {
+        return extractionDown;
+    }
+
+    public String getExtractionCancel() {
+        return extractionCancel;
     }
 
     public Map<String, List<ExtractionZone>> getExtractionZones() {
@@ -286,6 +322,14 @@ public class AdventureSettings {
 
     public List<String> getGuiInfoLore() {
         return guiInfoLore;
+    }
+
+    public int getPortalOpenSeconds() {
+        return portalOpenSeconds;
+    }
+
+    public int getDownSeconds() {
+        return downSeconds;
     }
 
 }

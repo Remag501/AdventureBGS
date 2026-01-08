@@ -16,11 +16,9 @@ import java.util.UUID;
 
 public class JoinListener implements Listener {
     private final AdventureBGS plugin;
-    private final DeathManager deathManager;
 
     public JoinListener(AdventureBGS plugin) {
         this.plugin = plugin;
-        this.deathManager = plugin.getDeathManager();
     }
 
     @EventHandler

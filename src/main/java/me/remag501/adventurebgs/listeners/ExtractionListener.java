@@ -26,12 +26,10 @@ public class ExtractionListener implements Listener {
 
     private final AdventureBGS plugin;
     private final ExtractionManager manager;
-    private final int extractionDuration;
 
     public ExtractionListener(AdventureBGS plugin) {
         this.plugin = plugin;
         this.manager = plugin.getExtractionManager();
-        this.extractionDuration = plugin.getConfig().getInt("extraction.duration");
     }
 
     /**
@@ -140,7 +138,7 @@ public class ExtractionListener implements Listener {
                     fromZone.cancelExtraction();
 
                     // Cancellation message: RESERVED for players inside the zone
-                    String cancelMessage = MessageUtil.color(plugin.getConfig().getString("extraction.message.cancel"));
+                    String cancelMessage = MessageUtil.color(plugin.getSettings().getExtractionCancel());
 
                     // Only message players who are in the now-cancelled zone
                     messagePlayersInZone(fromZone, cancelMessage);
@@ -178,16 +176,16 @@ public class ExtractionListener implements Listener {
 
     private void startExtraction(Player player, ExtractionZone zone) {
         // Broadcast start message: RESERVED for players inside the zone
-        String rawStartMsg = plugin.getConfig().getString("extraction.message.start");
+        String rawStartMsg = plugin.getSettings().getExtractionStart();
         String zoneNamePlaceholder = "Extraction Zone";
         String startMsg = MessageUtil.color(rawStartMsg
-                .replace("%seconds%", String.valueOf(extractionDuration))
+                .replace("%seconds%", String.valueOf(plugin.getSettings().getExtractionDuration()))
                 .replace("%zone%", zoneNamePlaceholder));
 
         // Message restricted to players currently in the zone
         messagePlayersInZone(zone, startMsg);
 
-        String title = MessageUtil.color(plugin.getConfig().getString("extraction.message.title"));
+        String title = MessageUtil.color(plugin.getSettings().getExtractionBossTitle());
 
         BossBar bossBar = Bukkit.createBossBar(
                 title,
@@ -210,7 +208,7 @@ public class ExtractionListener implements Listener {
         zone.startExtraction(null, bossBar, player);
 
         BukkitRunnable task = new BukkitRunnable() {
-            int timeLeft = extractionDuration;
+            int timeLeft = plugin.getSettings().getExtractionDuration();
             boolean alertTriggered = false;
 
             @Override
@@ -230,14 +228,14 @@ public class ExtractionListener implements Listener {
                     return;
                 }
 
-                int alertSeconds = plugin.getConfig().getInt("extraction.alert-seconds", 3);
+                int alertSeconds = plugin.getSettings().getAlertSeconds();
                 if (timeLeft == alertSeconds && !alertTriggered) {
                     // IMPLEMENTED: Global Alert System call
                     triggerAlert(zone);
                     alertTriggered = true;
                 }
 
-                zone.getExtractionBossBar().setProgress((double) timeLeft / extractionDuration);
+                zone.getExtractionBossBar().setProgress((double) timeLeft / plugin.getSettings().getExtractionDuration());
                 String updatedTitle = title.replace("%seconds%", String.valueOf(timeLeft));
                 zone.getExtractionBossBar().setTitle(updatedTitle);
                 timeLeft--;
@@ -259,7 +257,7 @@ public class ExtractionListener implements Listener {
         // 2. Clean up the extraction state (This also clears the extractingPlayers list and removes the BossBar from all viewers)
         zone.cancelExtraction();
 
-        String successMsg = MessageUtil.color(plugin.getConfig().getString("extraction.message.success"));
+        String successMsg = MessageUtil.color(plugin.getSettings().getExtractionSuccess());
 
         // SUCCESS MESSAGE: ONLY to the players who successfully extracted
         for (UUID uuid : successfulPlayers) {
@@ -284,8 +282,8 @@ public class ExtractionListener implements Listener {
         updateBeaconColor(zone, Material.AIR, Material.AIR);
 
         // --- Portal open phase ---
-        int portalOpenSeconds = plugin.getConfig().getInt("extraction.portal-open-seconds", 7);
-        String portalOpenMessage = plugin.getConfig().getString("extraction.message.portal-open")
+        int portalOpenSeconds = plugin.getSettings().getPortalOpenSeconds();
+        String portalOpenMessage = plugin.getSettings().getExtractionPortalOpen()
                 .replace("%seconds%", String.valueOf(portalOpenSeconds));
 
         // PORTAL OPEN MESSAGE: RESERVED for players *currently* inside the zone (excludes successful extractors)
@@ -323,8 +321,8 @@ public class ExtractionListener implements Listener {
                     }
 
                     // --- Phase 3: Extraction down (cooldown) ---
-                    int zoneDownSeconds = plugin.getConfig().getInt("extraction.down-seconds", 10);
-                    String zoneDownMsg = plugin.getConfig().getString("extraction.message.down")
+                    int zoneDownSeconds = plugin.getSettings().getDownSeconds();
+                    String zoneDownMsg = plugin.getSettings().getExtractionDown()
                             .replace("%seconds%", String.valueOf(zoneDownSeconds));
 
                     // ZONE DOWN MESSAGE: RESERVED for players inside the zone
@@ -389,7 +387,7 @@ public class ExtractionListener implements Listener {
      */
     private void triggerAlert(ExtractionZone zone) {
         // 1. Fetch config values for the alert
-        String rawSound = plugin.getConfig().getString("extraction.alert.sound", "ENTITY_WITHER_SPAWN");
+        String rawSound = plugin.getSettings().getAlertSound();
 
         World world = Bukkit.getWorld(zone.getWorld());
         if (world == null) return;

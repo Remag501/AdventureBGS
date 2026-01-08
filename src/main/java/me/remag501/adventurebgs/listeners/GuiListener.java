@@ -1,6 +1,8 @@
 package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.SettingsProvider;
+import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,16 +14,18 @@ import org.bukkit.plugin.Plugin;
 
 public class GuiListener implements Listener {
 
-    private AdventureBGS plugin;
+    private final RotationManager rotationManager;
+    private final SettingsProvider provider;
 
-    public GuiListener(AdventureBGS plugin) {
-        this.plugin = plugin;
+    public GuiListener(RotationManager rotationManager, SettingsProvider provider) {
+        this.rotationManager = rotationManager;
+        this.provider = provider;
     }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        String guiTitle = MessageUtil.color(plugin.getConfig().getString("gui.title"));
+        String guiTitle = MessageUtil.color(provider.getSettings().getGuiTitle());
         String viewTitle = event.getView().getTitle();
 
         if (!viewTitle.equals(guiTitle)) return;
@@ -30,11 +34,9 @@ public class GuiListener implements Listener {
 
         if (event.getCurrentItem() == null) return;
 
-        AdventureBGS plugin = (AdventureBGS) Bukkit.getPluginManager().getPlugin("AdventureBGS");
-
         if (event.getCurrentItem().getType() == Material.PLAYER_HEAD) {
             // Teleport with BetterRTP
-            String currentWorld = plugin.getRotationManager().getCurrentWorldName();
+            String currentWorld = rotationManager.getCurrentWorldName();
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + player.getName() + " " + currentWorld);
             player.closeInventory();
         }
