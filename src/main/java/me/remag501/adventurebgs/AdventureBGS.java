@@ -36,12 +36,12 @@ public class AdventureBGS extends JavaPlugin {
         this.settings = provider.getSettings();
 
         // Initialize managers
-        broadcastTask = new BroadcastTask(this);
-        deathManager = new DeathManager(this);
-        weatherManager = new WeatherManager(this);
-        penaltyManager = new PenaltyManager(this, broadcastTask);
-        extractionManager = new ExtractionManager(settings);
         rotationManager = new RotationManager(settings);
+        deathManager = new DeathManager(this);
+        extractionManager = new ExtractionManager(settings);
+        broadcastTask = new BroadcastTask(this, rotationManager, penaltyManager, settings);
+        penaltyManager = new PenaltyManager(this, broadcastTask, settings);
+        weatherManager = new WeatherManager(this, settings);
         guiManager = new GuiManager(rotationManager, settings);
 
         // Preload all configured worlds
@@ -76,10 +76,11 @@ public class AdventureBGS extends JavaPlugin {
         this.settings = provider.getSettings();
 
         // Change to update managers instead
-        penaltyManager.reloadSettings();
+        penaltyManager.reloadSettings(settings);
         extractionManager.reloadSettings(settings);
         guiManager.reloadSettings(settings);
         rotationManager.reloadSettings(settings);
+        weatherManager.reload(settings);
 
     }
 
@@ -94,35 +95,35 @@ public class AdventureBGS extends JavaPlugin {
         }
     }
 
-    public BroadcastTask getBroadcastTask() {
-        return broadcastTask;
-    }
-
-    public DeathManager getDeathManager() {
-        return deathManager;
-    }
-
-    public RotationManager getRotationManager() {
-        return rotationManager;
-    }
-
-    public PenaltyManager getPenaltyManager() {
-        return penaltyManager;
-    }
-
-    public ExtractionManager getExtractionManager() {
-        return extractionManager;
-    }
-
-    public GuiManager getGuiManager() {
-        return guiManager;
-    }
-
-    public WeatherManager getWeatherManager() {
-        return weatherManager;
-    }
-
-    public AdventureSettings getSettings() {
-        return settings;
-    }
+//    public BroadcastTask getBroadcastTask() {
+//        return broadcastTask;
+//    }
+//
+//    public DeathManager getDeathManager() {
+//        return deathManager;
+//    }
+//
+//    public RotationManager getRotationManager() {
+//        return rotationManager;
+//    }
+//
+//    public PenaltyManager getPenaltyManager() {
+//        return penaltyManager;
+//    }
+//
+//    public ExtractionManager getExtractionManager() {
+//        return extractionManager;
+//    }
+//
+//    public GuiManager getGuiManager() {
+//        return guiManager;
+//    }
+//
+//    public WeatherManager getWeatherManager() {
+//        return weatherManager;
+//    }
+//
+//    public AdventureSettings getSettings() {
+//        return settings;
+//    }
 }

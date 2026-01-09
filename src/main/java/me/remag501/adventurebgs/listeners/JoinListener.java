@@ -2,6 +2,7 @@ package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.managers.DeathManager;
+import me.remag501.adventurebgs.managers.PenaltyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -16,9 +17,11 @@ import java.util.UUID;
 
 public class JoinListener implements Listener {
     private final AdventureBGS plugin;
+    private final PenaltyManager penaltyManager;
 
-    public JoinListener(AdventureBGS plugin) {
+    public JoinListener(AdventureBGS plugin, PenaltyManager penaltyManager) {
         this.plugin = plugin;
+        this.penaltyManager = penaltyManager;
     }
 
     @EventHandler
@@ -38,7 +41,7 @@ public class JoinListener implements Listener {
         if (playerVersion < worldVersion) {
             // They were here before the last regeneration
             player.sendMessage("§c§l(!) §cYou left the map before extracting!");
-            plugin.getPenaltyManager().penalizePlayer(player);
+            penaltyManager.penalizePlayer(player);
 
             // Update their version so they don't die again until the next reset
             player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, worldVersion);

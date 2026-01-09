@@ -3,10 +3,12 @@ package me.remag501.adventurebgs.tasks;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.AdventureSettings;
+import me.remag501.adventurebgs.managers.PenaltyManager;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -19,27 +21,31 @@ import java.util.List;
 public class BroadcastTask implements Runnable {
 
     private final AdventureBGS plugin;
+    private final RotationManager rotationManager;
+    private final PenaltyManager penaltyManager;
 
+    private AdventureSettings settings;
     private boolean hasBroadcasted = false;
     private BukkitRunnable warningTask;
     private BossBar warningBossBar;
 
-    public BroadcastTask(AdventureBGS plugin) {
+    public BroadcastTask(AdventureBGS plugin, RotationManager rotationManager, AdventureSettings settings) {
         this.plugin = plugin;
+        this.rotationManager = rotationManager;
+        this.penaltyManager = penaltyManager;
+        this.settings = settings;
     }
 
     @Override
     public void run() {
-        RotationManager rotation = plugin.getRotationManager();
-        AdventureSettings settings = plugin.getSettings();
 
-        long minutesLeft = rotation.getMinutesUntilNextCycle();
+        long minutesLeft = rotationManager.getMinutesUntilNextCycle();
         long warnMinutes = settings.getWarnMinutes();
 
-        String currentMap = rotation.getCurrentWorld().getChatName();
-        String nextMap = rotation.getNextWorld().getChatName();
+        String currentMap = rotationManager.getCurrentWorld().getChatName();
+        String nextMap = rotationManager.getNextWorld().getChatName();
 
-        long secondsLeft = rotation.getSecondsUntilNextCycle();
+        long secondsLeft = rotationManager.getSecondsUntilNextCycle();
         long warnSeconds = warnMinutes * 60;
 
         // =======================
@@ -49,9 +55,9 @@ public class BroadcastTask implements Runnable {
 
             String msg = settings.getWarnMessage();
             String formattedMsg = MessageUtil.format(msg, currentMap, nextMap, minutesLeft);
-            String broadcastMsg = MessageUtil.color(rotation.getCurrentWorld().getChatName()) + " §fcloses in §c" + warnMinutes + " §fminutes...";
+            String broadcastMsg = MessageUtil.color(rotationManager.getCurrentWorld().getChatName()) + " §fcloses in §c" + warnMinutes + " §fminutes...";
             Bukkit.broadcastMessage(formattedMsg);
-            World currentWorld = Bukkit.getWorld(rotation.getCurrentWorld().getId());
+            World currentWorld = Bukkit.getWorld(rotationManager.getCurrentWorld().getId());
 
             // Make warning into a title bar
             if (currentWorld != null) {
@@ -69,16 +75,16 @@ public class BroadcastTask implements Runnable {
             }
 
             // Run next-world commands
-            runWorldCommands(null, rotation.getNextWorld());
+            runWorldCommands(null, rotationManager.getNextWorld());
 
-            startWarningCountdown(rotation);
+            startWarningCountdown(rotationManager);
             hasBroadcasted = true;
         }
 
         // =======================
         // ROTATION OCCURRED
         // =======================
-        if (rotation.isNewCycle()) {
+        if (rotationManager.isNewCycle()) {
 
             String msg = settings.getNewMapMessage();
             Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
@@ -165,7 +171,7 @@ public class BroadcastTask implements Runnable {
 
             @Override
             public void run() {
-                plugin.getPenaltyManager().applyPenalty(world.getName());
+                penaltyManager.applyPenalty(world.getName());
             }
         }.runTaskLater(plugin, totalSeconds * 20L);
     }

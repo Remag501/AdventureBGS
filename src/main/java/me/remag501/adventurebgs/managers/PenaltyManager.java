@@ -2,6 +2,7 @@ package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.AdventureSettings;
+import me.remag501.adventurebgs.SettingsProvider;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.*;
@@ -25,14 +26,14 @@ public class PenaltyManager {
     private AdventureSettings settings;
 
 
-    public PenaltyManager(AdventureBGS plugin, BroadcastTask broadcastTask) {
+    public PenaltyManager(AdventureBGS plugin, BroadcastTask broadcastTask, AdventureSettings settings) {
         this.plugin = plugin;
         this.broadcastTask = broadcastTask;
-        this.settings = plugin.getSettings();
+        this.settings = settings;
     }
 
-    public void reloadSettings() {
-        this.settings = plugin.getSettings();
+    public void reloadSettings(AdventureSettings settings) {
+        this.settings = settings;
     }
 
     public void applyPenalty(String closedWorldName) {

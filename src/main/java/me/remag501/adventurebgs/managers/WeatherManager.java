@@ -21,13 +21,17 @@ public class WeatherManager {
     );
 
     private final AdventureBGS plugin;
-    private final List<WeatherModel> weathers;
 
-    public WeatherManager(AdventureBGS plugin) {
+    private List<WeatherModel> weathers;
+
+    public WeatherManager(AdventureBGS plugin, AdventureSettings settings) {
         this.plugin = plugin;
-        AdventureSettings settings = plugin.getSettings();
         weathers = settings.getWeatherModels();
         startScheduling();
+    }
+
+    public void reload(AdventureSettings settings) {
+        this.weathers = settings.getWeatherModels();
     }
 
 
