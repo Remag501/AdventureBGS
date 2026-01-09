@@ -36,13 +36,18 @@ public class AdventureBGS extends JavaPlugin {
         this.settings = provider.getSettings();
 
         // Initialize managers
-        rotationManager = new RotationManager(settings);
-        deathManager = new DeathManager(this);
-        extractionManager = new ExtractionManager(settings);
-        broadcastTask = new BroadcastTask(this, rotationManager, penaltyManager, settings);
-        penaltyManager = new PenaltyManager(this, broadcastTask, settings);
-        weatherManager = new WeatherManager(this, settings);
-        guiManager = new GuiManager(rotationManager, settings);
+        // 1. Independent Managers (Leaves)
+        this.rotationManager = new RotationManager(settings);
+        this.deathManager = new DeathManager(this);
+        this.extractionManager = new ExtractionManager(settings);
+
+        // 2. Managers that need Rotation (Workers)
+        this.broadcastTask = new BroadcastTask(this, rotationManager, settings);
+        this.weatherManager = new WeatherManager(this, settings);
+
+        // 3. Complex Managers (Controllers)
+        this.penaltyManager = new PenaltyManager(this, rotationManager, broadcastTask, settings);
+        this.guiManager = new GuiManager(rotationManager, settings);
 
         // Preload all configured worlds
         preloadWorlds();
@@ -51,8 +56,8 @@ public class AdventureBGS extends JavaPlugin {
         getCommand("adventure").setExecutor(new AdventureCommand(this));
 
         // Register Listener
-        getServer().getPluginManager().registerEvents(new ExtractionListener(this), this);
-        getServer().getPluginManager().registerEvents(new JoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager, rotationManager, provider), this);
+        getServer().getPluginManager().registerEvents(new JoinListener(this, penaltyManager), this);
         getServer().getPluginManager().registerEvents(new GuiListener(rotationManager, provider), this);
         getServer().getPluginManager().registerEvents(new BroadcastListener(rotationManager, broadcastTask), this);
 
@@ -94,36 +99,4 @@ public class AdventureBGS extends JavaPlugin {
             }
         }
     }
-
-//    public BroadcastTask getBroadcastTask() {
-//        return broadcastTask;
-//    }
-//
-//    public DeathManager getDeathManager() {
-//        return deathManager;
-//    }
-//
-//    public RotationManager getRotationManager() {
-//        return rotationManager;
-//    }
-//
-//    public PenaltyManager getPenaltyManager() {
-//        return penaltyManager;
-//    }
-//
-//    public ExtractionManager getExtractionManager() {
-//        return extractionManager;
-//    }
-//
-//    public GuiManager getGuiManager() {
-//        return guiManager;
-//    }
-//
-//    public WeatherManager getWeatherManager() {
-//        return weatherManager;
-//    }
-//
-//    public AdventureSettings getSettings() {
-//        return settings;
-//    }
 }

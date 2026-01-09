@@ -22,14 +22,22 @@ public class PenaltyManager {
 
     private final AdventureBGS plugin;
     private final BroadcastTask broadcastTask;
+    private final RotationManager rotationManager;
 
     private AdventureSettings settings;
 
 
-    public PenaltyManager(AdventureBGS plugin, BroadcastTask broadcastTask, AdventureSettings settings) {
+    public PenaltyManager(AdventureBGS plugin, RotationManager rotationManager, BroadcastTask broadcastTask, AdventureSettings settings) {
         this.plugin = plugin;
         this.broadcastTask = broadcastTask;
         this.settings = settings;
+        this.rotationManager = rotationManager;
+
+        // Lambda function to apply penalty based on broadcast task
+        this.broadcastTask.setOnTimeUp(() -> {
+            String currentWorld = rotationManager.getCurrentWorld().getId();
+            this.applyPenalty(currentWorld);
+        });
     }
 
     public void reloadSettings(AdventureSettings settings) {
