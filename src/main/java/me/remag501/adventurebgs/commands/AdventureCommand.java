@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs.commands;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.managers.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -16,9 +17,11 @@ import java.util.List;
 public class AdventureCommand implements CommandExecutor {
 
     private final AdventureBGS plugin;
+    private final GuiManager guiManager;
 
-    public AdventureCommand(AdventureBGS plugin) {
+    public AdventureCommand(AdventureBGS plugin, GuiManager guiManager) {
         this.plugin = plugin;
+        this.guiManager = guiManager;
     }
 
     @Override
@@ -36,7 +39,7 @@ public class AdventureCommand implements CommandExecutor {
         }
 
         // Use GUI manager to handle adventure
-        plugin.getGuiManager().openAdventureGUI((Player) sender);
+        guiManager.openAdventureGUI((Player) sender);
         return true;
     }
 

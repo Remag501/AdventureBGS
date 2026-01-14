@@ -37,9 +37,9 @@ public class AdventureBGS extends JavaPlugin {
 
         // Initialize managers
         // 1. Independent Managers (Leaves)
-        this.rotationManager = new RotationManager(settings);
-        this.deathManager = new DeathManager(this);
         this.extractionManager = new ExtractionManager(settings);
+        this.deathManager = new DeathManager(this);
+        this.rotationManager = new RotationManager(this, settings);
 
         // 2. Managers that need Rotation (Workers)
         this.broadcastTask = new BroadcastTask(this, rotationManager, settings);
@@ -50,10 +50,10 @@ public class AdventureBGS extends JavaPlugin {
         this.guiManager = new GuiManager(rotationManager, settings);
 
         // Preload all configured worlds
-        preloadWorlds();
+//        preloadWorlds();
 
         // Register commands
-        getCommand("adventure").setExecutor(new AdventureCommand(this));
+        getCommand("adventure").setExecutor(new AdventureCommand(this, guiManager));
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager, rotationManager, provider), this);
@@ -89,14 +89,14 @@ public class AdventureBGS extends JavaPlugin {
 
     }
 
-    private void preloadWorlds() {
-        for (String worldName : rotationManager.getWorlds()) {
-            World world = Bukkit.getWorld(worldName);
-            if (world == null) {
-                getLogger().warning("World not loaded: " + worldName);
-            } else {
-                getLogger().info("Preloaded world: " + worldName);
-            }
-        }
-    }
+//    private void preloadWorlds() {
+//        for (String worldName : rotationManager.getWorlds()) {
+//            World world = Bukkit.getWorld(worldName);
+//            if (world == null) {
+//                getLogger().warning("World not loaded: " + worldName);
+//            } else {
+//                getLogger().info("Preloaded world: " + worldName);
+//            }
+//        }
+//    }
 }
