@@ -5,6 +5,7 @@ import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.AdventureSettings;
 import me.remag501.adventurebgs.managers.PenaltyManager;
 import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
@@ -15,6 +16,7 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Consumer;
 
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class BroadcastTask implements Runnable {
     private boolean hasBroadcasted = false;
     private BukkitRunnable warningTask;
     private BossBar warningBossBar;
-    private Runnable onTimeUp;
+    private Consumer<RotationTrack> onTimeUp;
 
     public BroadcastTask(AdventureBGS plugin, RotationManager rotationManager, AdventureSettings settings) {
         this.plugin = plugin;
@@ -38,66 +40,69 @@ public class BroadcastTask implements Runnable {
     @Override
     public void run() {
 
-        long minutesLeft = rotationManager.getMinutesUntilNextCycle();
-        long warnMinutes = settings.getWarnMinutes();
+        for (RotationTrack rotationTrack: rotationManager.getTracks()) { // Change: Loop through every track in rotation manager, use same logic
 
-        String currentMap = rotationManager.getCurrentWorld().getChatName();
-        String nextMap = rotationManager.getNextWorld().getChatName();
+            long minutesLeft = rotationTrack.getMinutesUntilNextCycle();
+            long warnMinutes = settings.getWarnMinutes();
 
-        long secondsLeft = rotationManager.getSecondsUntilNextCycle();
-        long warnSeconds = warnMinutes * 60;
+            String currentMap = rotationTrack.getCurrentWorld().getChatName();
+            String nextMap = rotationTrack.getNextWorld().getChatName();
 
-        // =======================
-        // WARNING PHASE
-        // =======================
-        if (secondsLeft <= warnSeconds && secondsLeft > warnSeconds - 20 && !hasBroadcasted) {
+            long secondsLeft = rotationTrack.getSecondsUntilNextCycle();
+            long warnSeconds = warnMinutes * 60;
 
-            String msg = settings.getWarnMessage();
-            String formattedMsg = MessageUtil.format(msg, currentMap, nextMap, minutesLeft);
-            String broadcastMsg = MessageUtil.color(rotationManager.getCurrentWorld().getChatName()) + " §fcloses in §c" + warnMinutes + " §fminutes...";
-            Bukkit.broadcastMessage(formattedMsg);
-            World currentWorld = Bukkit.getWorld(rotationManager.getCurrentWorld().getId());
+            // =======================
+            // WARNING PHASE
+            // =======================
+            if (secondsLeft <= warnSeconds && secondsLeft > warnSeconds - 20 && !hasBroadcasted) {
 
-            // Make warning into a title bar
-            if (currentWorld != null) {
-                for (Player player : currentWorld.getPlayers()) {
-                    // sendTitle(title, subtitle, fadeIn, stay, fadeOut)
-                    // Using the message as the main title, and an empty string for subtitle
-                    player.sendTitle(
-                            broadcastMsg,
-                            "",
-                            10, // 0.5s fade in
-                            70, // 3.5s stay
-                            20  // 1.0s fade out
-                    );
+                String msg = settings.getWarnMessage();
+                String formattedMsg = MessageUtil.format(msg, currentMap, nextMap, minutesLeft);
+                String broadcastMsg = MessageUtil.color(rotationTrack.getCurrentWorld().getChatName()) + " §fcloses in §c" + warnMinutes + " §fminutes...";
+                Bukkit.broadcastMessage(formattedMsg);
+                World currentWorld = Bukkit.getWorld(rotationTrack.getCurrentWorld().getId());
+
+                // Make warning into a title bar
+                if (currentWorld != null) {
+                    for (Player player : currentWorld.getPlayers()) {
+                        // sendTitle(title, subtitle, fadeIn, stay, fadeOut)
+                        // Using the message as the main title, and an empty string for subtitle
+                        player.sendTitle(
+                                broadcastMsg,
+                                "",
+                                10, // 0.5s fade in
+                                70, // 3.5s stay
+                                20  // 1.0s fade out
+                        );
+                    }
                 }
+
+                // Run next-world commands
+                runWorldCommands(null, rotationTrack.getNextWorld());
+
+                startWarningCountdown(rotationTrack);
+                hasBroadcasted = true;
             }
 
-            // Run next-world commands
-            runWorldCommands(null, rotationManager.getNextWorld());
+            // =======================
+            // ROTATION OCCURRED
+            // =======================
+            if (rotationTrack.isNewCycle()) {
 
-            startWarningCountdown(rotationManager);
-            hasBroadcasted = true;
-        }
+                String msg = settings.getNewMapMessage();
+                Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
 
-        // =======================
-        // ROTATION OCCURRED
-        // =======================
-        if (rotationManager.isNewCycle()) {
+                stopWarningCountdown();
+                hasBroadcasted = false;
+            }
 
-            String msg = settings.getNewMapMessage();
-            Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
-
-            stopWarningCountdown();
-            hasBroadcasted = false;
         }
     }
 
     // A simple setter to tell the task what to do when it finishes
-    public void setOnTimeUp(Runnable onTimeUp) {
+    public void setOnTimeUp(Consumer<RotationTrack> onTimeUp) {
         this.onTimeUp = onTimeUp;
     }
-
     private void runWorldCommands(Player player, WorldInfo world) {
         // 1. Get the raw list from the object
         List<String> rawCommands = world.getCommands();
@@ -115,7 +120,7 @@ public class BroadcastTask implements Runnable {
     // =======================
     // WARNING COUNTDOWN
     // =======================
-    private void startWarningCountdown(RotationManager rotation) {
+    private void startWarningCountdown(RotationTrack rotation) {
 
         long totalSeconds = rotation.getSecondsUntilNextCycle();
 
@@ -170,15 +175,18 @@ public class BroadcastTask implements Runnable {
         warningTask.runTaskTimer(plugin, 0L, 20L);
 
 
+        RotationTrack track = rotation; // final capture
+
         // Apply penalty after warning ticks
         new BukkitRunnable() {
-
             @Override
             public void run() {
-//                penaltyManager.applyPenalty(world.getName());
-                if (onTimeUp != null) onTimeUp.run();
+                if (onTimeUp != null) {
+                    onTimeUp.accept(track);
+                }
             }
         }.runTaskLater(plugin, totalSeconds * 20L);
+
     }
 
     private void stopWarningCountdown() {

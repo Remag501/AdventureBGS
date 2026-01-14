@@ -119,7 +119,7 @@ public class ExtractionListener implements Listener {
         }
 
         // 2. Ignore players not in extraction world
-        if (!player.getWorld().getName().equals(rotationManager.getCurrentWorld().getId()))
+        if (!player.getWorld().getName().equals(rotationManager.getTrackByWorld(player.getWorld()).getCurrentWorld().getId()))
             return;
 
         // 3. Find the zone the player is moving into and the zone they are moving from
