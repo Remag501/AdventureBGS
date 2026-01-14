@@ -5,6 +5,7 @@ import me.remag501.adventurebgs.SettingsProvider;
 import me.remag501.adventurebgs.managers.ExtractionManager;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.ExtractionZone;
+import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -119,7 +120,10 @@ public class ExtractionListener implements Listener {
         }
 
         // 2. Ignore players not in extraction world
-        if (!player.getWorld().getName().equals(rotationManager.getTrackByWorld(player.getWorld()).getCurrentWorld().getId()))
+        RotationTrack track = rotationManager.getTrackByWorld(player.getWorld());
+        if (track == null)
+            return;
+        if (!player.getWorld().getName().equals(track.getCurrentWorld().getId()))
             return;
 
         // 3. Find the zone the player is moving into and the zone they are moving from
