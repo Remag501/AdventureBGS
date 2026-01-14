@@ -34,10 +34,7 @@ public class PenaltyManager {
         this.rotationManager = rotationManager;
 
         // Lambda function to apply penalty based on broadcast task
-        broadcastTask.setOnTimeUp(track -> {
-            String worldId = track.getCurrentWorld().getId();
-            applyPenalty(worldId);
-        });
+        broadcastTask.setOnTimeUp(this::applyPenalty);
     }
 
     public void reloadSettings(AdventureSettings settings) {

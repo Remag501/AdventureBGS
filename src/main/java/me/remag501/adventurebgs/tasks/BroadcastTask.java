@@ -29,7 +29,7 @@ public class BroadcastTask implements Runnable {
     private boolean hasBroadcasted = false;
     private BukkitRunnable warningTask;
     private BossBar warningBossBar;
-    private Consumer<RotationTrack> onTimeUp;
+    private Consumer<String> onTimeUp;
 
     public BroadcastTask(AdventureBGS plugin, RotationManager rotationManager, AdventureSettings settings) {
         this.plugin = plugin;
@@ -100,7 +100,7 @@ public class BroadcastTask implements Runnable {
     }
 
     // A simple setter to tell the task what to do when it finishes
-    public void setOnTimeUp(Consumer<RotationTrack> onTimeUp) {
+    public void setOnTimeUp(Consumer<String> onTimeUp) {
         this.onTimeUp = onTimeUp;
     }
     private void runWorldCommands(Player player, WorldInfo world) {
@@ -174,15 +174,12 @@ public class BroadcastTask implements Runnable {
 
         warningTask.runTaskTimer(plugin, 0L, 20L);
 
-
-        RotationTrack track = rotation; // final capture
-
         // Apply penalty after warning ticks
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (onTimeUp != null) {
-                    onTimeUp.accept(track);
+                    onTimeUp.accept(world.getName());
                 }
             }
         }.runTaskLater(plugin, totalSeconds * 20L);
