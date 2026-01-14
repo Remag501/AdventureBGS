@@ -110,18 +110,15 @@ public class RotationManager {
 
     private void loadTracks(AdventureSettings settings) {
         // For now: one track using existing config
-        RotationTrack track = new RotationTrack(
-                "default",
-                settings.getWorlds(),
-                settings.getCycleMinutes(),
-                settings.getStartCycle()
-        );
 
-        tracks.put(track.getId(), track);
+            for (RotationTrack track : settings.getTracks().values()) {
+                tracks.put(track.getId(), track);
 
-        for (WorldInfo world : settings.getWorlds()) {
-            worldToTrack.put(world.getId(), track);
-        }
+                for (WorldInfo world : track.getWorlds()) {
+                    worldToTrack.put(world.getId(), track);
+                }
+            }
+
     }
 
     private void startTicker() {

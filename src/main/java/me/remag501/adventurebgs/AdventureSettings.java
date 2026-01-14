@@ -1,8 +1,6 @@
 package me.remag501.adventurebgs;
 
-import me.remag501.adventurebgs.model.ExtractionZone;
-import me.remag501.adventurebgs.model.WeatherModel;
-import me.remag501.adventurebgs.model.WorldInfo;
+import me.remag501.adventurebgs.model.*;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import org.bukkit.Bukkit;
@@ -17,9 +15,8 @@ import java.util.*;
 public class AdventureSettings {
 
     // Rotation
-    private final int cycleMinutes;
-    private final Instant startCycle;
     private final List<WorldInfo> worlds = new ArrayList<>();
+    private final Map<String, RotationTrack> tracks = new LinkedHashMap<>();
 
     // Broadcast
     private final int warnMinutes;
@@ -54,40 +51,59 @@ public class AdventureSettings {
 
     // GUI
     private final String guiTitle;
-    private final int guiTeleportSlot;
-    private final String guiTeleportName;
-    private final int guiInfoSlot;
-    private final String guiInfoName;
-    private final List<String> guiInfoLore;
 
     // Weather
     private final List<WeatherModel> weatherModels = new ArrayList<>();
 
     public AdventureSettings(FileConfiguration config) {
         // --- Rotation ---
-        this.cycleMinutes = config.getInt("rotation.cycle-minutes");
-        this.startCycle = Instant.parse(config.getString("rotation.start-cycle", "2025-01-01T00:00:00Z"));
+        ConfigurationSection rotationSec = config.getConfigurationSection("rotation");
+        if (rotationSec == null) {
+            throw new IllegalStateException("rotation section missing");
+        }
 
-        List<Map<?, ?>> worldsList = config.getMapList("rotation.worlds");
+        for (String trackId : rotationSec.getKeys(false)) {
 
-        if (worldsList != null && !worldsList.isEmpty()) {
-            for (Map<?, ?> map : worldsList) {
-                // Since it's a list of maps, we pull values directly from the map
+            ConfigurationSection trackSec = rotationSec.getConfigurationSection(trackId);
+            if (trackSec == null) continue;
+
+            int cycleMinutes = trackSec.getInt("cycle-minutes");
+            Instant startCycle = Instant.parse(trackSec.getString("start-cycle"));
+
+            // --- GUI ---
+            TrackGuiConfig gui = new TrackGuiConfig(
+                    trackSec.getConfigurationSection("gui"),
+                    this::color,
+                    this::colorList
+            );
+
+            // --- Worlds ---
+            List<WorldInfo> worlds = new ArrayList<>();
+            List<Map<?, ?>> worldList = trackSec.getMapList("worlds");
+
+            for (Map<?, ?> map : worldList) {
                 String id = (String) map.get("id");
                 String texture = (String) map.get("texture");
                 String chatName = color((String) map.get("chat-name"));
                 String guiName = color((String) map.get("gui-name"));
 
-                // Handle Lists safely
                 List<String> lore = colorList((List<String>) map.get("lore"));
                 List<String> commands = (List<String>) map.get("commands");
 
                 worlds.add(new WorldInfo(id, texture, chatName, guiName, lore, commands));
-                Bukkit.getLogger().info("Successfully loaded world: " + id);
             }
-        } else {
-            Bukkit.getLogger().warning("Rotation worlds list is null or empty!");
+
+            RotationTrack track = new RotationTrack(
+                    trackId,
+                    worlds,
+                    cycleMinutes,
+                    startCycle,
+                    gui
+            );
+
+            tracks.put(trackId, track);
         }
+
 
         // --- Broadcast & Penalty ---
         this.warnMinutes = config.getInt("broadcast.warn-minutes");
@@ -144,11 +160,6 @@ public class AdventureSettings {
 
         // --- GUI ---
         this.guiTitle = color(config.getString("gui.title"));
-        this.guiTeleportSlot = config.getInt("gui.teleport.slot");
-        this.guiTeleportName = color(config.getString("gui.teleport.name"));
-        this.guiInfoSlot = config.getInt("gui.info.slot");
-        this.guiInfoName = color(config.getString("gui.info.name"));
-        this.guiInfoLore = colorList(config.getStringList("gui.info.lore"));
 
         // --- Weather ---
         List<Map<?, ?>> weatherList = config.getMapList("weather");
@@ -211,14 +222,6 @@ public class AdventureSettings {
     public List<ExtractionZone> getZonesForWorld(String worldId) { return extractionZones.getOrDefault(worldId, Collections.emptyList()); }
 
     // Remaining getters
-
-    public int getCycleMinutes() {
-        return cycleMinutes;
-    }
-
-    public Instant getStartCycle() {
-        return startCycle;
-    }
 
     public int getWarnMinutes() {
         return warnMinutes;
@@ -304,32 +307,16 @@ public class AdventureSettings {
         return guiTitle;
     }
 
-    public int getGuiTeleportSlot() {
-        return guiTeleportSlot;
-    }
-
-    public String getGuiTeleportName() {
-        return guiTeleportName;
-    }
-
-    public int getGuiInfoSlot() {
-        return guiInfoSlot;
-    }
-
-    public String getGuiInfoName() {
-        return guiInfoName;
-    }
-
-    public List<String> getGuiInfoLore() {
-        return guiInfoLore;
-    }
-
     public int getPortalOpenSeconds() {
         return portalOpenSeconds;
     }
 
     public int getDownSeconds() {
         return downSeconds;
+    }
+
+    public Map<String, RotationTrack> getTracks() {
+        return tracks;
     }
 
 }
