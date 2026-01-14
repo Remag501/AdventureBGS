@@ -3,6 +3,7 @@ package me.remag501.adventurebgs.listeners;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.SettingsProvider;
 import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -36,7 +37,9 @@ public class GuiListener implements Listener {
 
         if (event.getCurrentItem().getType() == Material.PLAYER_HEAD) {
             // Teleport with BetterRTP
-            String currentWorld = rotationManager.getCurrentWorldName();
+            RotationTrack rotationTrack = rotationManager.getTrackByWorld(Bukkit.getWorld("Sahara")); // Hardcoded temporarily, will be replaced with for loop
+
+            String currentWorld = rotationTrack.getCurrentWorld().getId();
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + player.getName() + " " + currentWorld);
             player.closeInventory();
         }

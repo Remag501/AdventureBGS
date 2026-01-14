@@ -2,6 +2,7 @@ package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.AdventureSettings;
+import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
 import me.remag501.adventurebgs.util.SkullUtil;
@@ -29,9 +30,11 @@ public class GuiManager {
     }
 
     public void openAdventureGUI(Player player) {
-        String currentWorld = rotationManager.getCurrentWorld().getGuiName();
-        String nextWorld = rotationManager.getNextWorld().getGuiName();
-        long minutesLeft = rotationManager.getMinutesUntilNextCycle();
+        RotationTrack rotationTrack = rotationManager.getTrackByWorld(Bukkit.getWorld("Sahara")); // Hardcoded temporarily, will be replaced with for loop
+
+        String currentWorld = rotationTrack.getCurrentWorld().getGuiName();
+        String nextWorld = rotationTrack.getNextWorld().getGuiName();
+        long minutesLeft = rotationTrack.getMinutesUntilNextCycle();
 
         // GUI Title
         String guiTitle = MessageUtil.color(settings.getGuiTitle());
@@ -39,13 +42,13 @@ public class GuiManager {
         Inventory gui = Bukkit.createInventory(null, 36, guiTitle);
 
         // --- Teleport Item ---
-        WorldInfo currentInfo = rotationManager.getCurrentWorld();
+        WorldInfo currentInfo = rotationTrack.getCurrentWorld();
 
         int tpSlot = settings.getGuiTeleportSlot();
         String tpName = settings.getGuiTeleportName()
                 .replace("%current_world%", currentWorld);
 
-        List<String> tpLore = rotationManager.getCurrentWorld().getLore()
+        List<String> tpLore = rotationTrack.getCurrentWorld().getLore()
                 .stream()
                 .map(line -> line.replace("%current_world%", currentWorld))
                 .map(MessageUtil::color)
