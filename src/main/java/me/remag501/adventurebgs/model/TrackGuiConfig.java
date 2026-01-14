@@ -22,4 +22,25 @@ public final class TrackGuiConfig {
         this.infoName = color.apply(sec.getString("info.name"));
         this.infoLore = colorList.apply(sec.getStringList("info.lore"));
     }
+
+    public int getTeleportSlot() {
+        return teleportSlot;
+    }
+
+    public String getTeleportName() {
+        return teleportName;
+    }
+
+    public int getInfoSlot() {
+        return infoSlot;
+    }
+
+    public String getInfoName() {
+        return infoName;
+    }
+
+    public List<String> getInfoLore() {
+        return infoLore;
+    }
+
 }

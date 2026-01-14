@@ -83,5 +83,10 @@ public final class RotationTrack {
     public String getId() {
         return id;
     }
+
+    public TrackGuiConfig getGui() {
+        return gui;
+    }
+
 }
 

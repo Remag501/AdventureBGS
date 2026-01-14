@@ -44,8 +44,8 @@ public class GuiManager {
         // --- Teleport Item ---
         WorldInfo currentInfo = rotationTrack.getCurrentWorld();
 
-        int tpSlot = settings.getGuiTeleportSlot();
-        String tpName = settings.getGuiTeleportName()
+        int tpSlot = rotationTrack.getGui().getTeleportSlot();
+        String tpName = rotationTrack.getGui().getTeleportName()
                 .replace("%current_world%", currentWorld);
 
         List<String> tpLore = rotationTrack.getCurrentWorld().getLore()
@@ -65,10 +65,10 @@ public class GuiManager {
         gui.setItem(tpSlot, teleportItem);
 
         // --- Info (Clock) Item ---
-        int infoSlot = settings.getGuiInfoSlot();
-        String infoName = settings.getGuiInfoName();
+        int infoSlot = rotationTrack.getGui().getInfoSlot();
+        String infoName = rotationTrack.getGui().getInfoName();
 
-        List<String> infoLore = settings.getGuiInfoLore()
+        List<String> infoLore = rotationTrack.getGui().getInfoLore()
                 .stream()
                 .map(line -> line.replace("%minutes_left%", String.valueOf(minutesLeft)))
                 .map(line -> line.replace("%next_world%", nextWorld))
