@@ -47,7 +47,7 @@ public class AdventureBGS extends JavaPlugin {
 
         // 3. Complex Managers (Controllers)
         this.penaltyManager = new PenaltyManager(this, rotationManager, broadcastTask, settings);
-        this.guiManager = new GuiManager(rotationManager, settings);
+        this.guiManager = new GuiManager(this, rotationManager, settings);
 
         // Preload all configured worlds
 //        preloadWorlds();
@@ -58,7 +58,7 @@ public class AdventureBGS extends JavaPlugin {
         // Register Listener
         getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager, rotationManager, provider), this);
         getServer().getPluginManager().registerEvents(new JoinListener(this, penaltyManager), this);
-        getServer().getPluginManager().registerEvents(new GuiListener(rotationManager, provider), this);
+        getServer().getPluginManager().registerEvents(new GuiListener(this, rotationManager, provider), this);
         getServer().getPluginManager().registerEvents(new BroadcastListener(rotationManager, broadcastTask), this);
 
         // Start broadcasting messages
@@ -77,6 +77,7 @@ public class AdventureBGS extends JavaPlugin {
     }
 
     public void reloadPluginConfig() {
+        this.reloadConfig();
         provider.updateConfig(this);
         this.settings = provider.getSettings();
 

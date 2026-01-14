@@ -93,6 +93,8 @@ public class AdventureSettings {
                 worlds.add(new WorldInfo(id, texture, chatName, guiName, lore, commands));
             }
 
+            Bukkit.getLogger().info(worlds.toString());
+
             RotationTrack track = new RotationTrack(
                     trackId,
                     worlds,
