@@ -1,39 +1,67 @@
+gui:
+  title: "&6Adventure Menu"
+
 rotation:
-  cycle-minutes: 30
-  start-cycle: "2025-07-27T00:00:00Z" # UTC ISO-8601 timestamp
-  worlds:
-    - id: "sahara"
-      texture: "http://textures.minecraft.net/texture/abc123..."
-      chat-name: "&cFirst Adventure World"
-      gui-name: "&6Adventure World 1"
-      lore:
-        - "&6This is the first adventure world!"
-        - "&6Add lore here"
-      commands:
-        - "say world 1"
-    - id: "sahara"
-      texture: "http://textures.minecraft.net/texture/def456..."
-      chat-name: "&cSecond Adventure World"
-      gui-name: "&6Adventure World 2"
-      lore:
-        - "&6This is the second adventure world!"
-        - "&6Add lore here"
-      commands:
-        - "say world 2"
-    - id: "sahara"
-      texture: "http://textures.minecraft.net/texture/ghi789..."
-      chat-name: "&cThird Adventure World"
-      gui-name: "&6Adventure World 3"
-      lore:
-        - "&6This is the third adventure world!"
-        - "&6Add lore here"
-      commands:
-        - "say world 3"
+  default:
+    cycle-minutes: 2
+    start-cycle: "2025-07-27T00:00:00Z"
+    gui:
+      teleport:
+        slot: 12
+        name: "&aEnter: %current_world%"
+      info:
+        slot: 21
+        name: "&eCycle Info"
+        lore:
+          - "&7Closes in: %minutes_left% minutes"
+          - "&7Next map: %next_world%"
+    worlds:
+      - id: "sahara"
+        texture: "http://textures.minecraft.net/texture/abc123..."
+        chat-name: "&cSahara"
+        gui-name: "&6Sahara"
+        lore:
+          - "&6This is the first adventure world!"
+          - "&6Add lore here"
+        commands:
+          - "say world 1 %adventurebgs_current_world_id%"
+      - id: "icycavern"
+        texture: "http://textures.minecraft.net/texture/abc123..."
+        chat-name: "&cIcycavern"
+        gui-name: "&6Icycavern"
+        lore:
+          - "&6This is the second adventure world!"
+          - "&6Add lore here"
+        commands:
+          - "say world 2 %adventurebgs_current_world_id%"
+  hard:
+    cycle-minutes: 2
+    start-cycle: "2025-07-27T00:00:00Z"
+    gui:
+      teleport:
+        slot: 14
+        name: "&aBeware: %current_world%"
+      info:
+        slot: 23
+        name: "&eCycle Info"
+        lore:
+          - "&7Closes in: %minutes_left% minutes"
+          - "&7Next map: %next_world%"
+    worlds:
+      - id: "test"
+        texture: "http://textures.minecraft.net/texture/abc123..."
+        chat-name: "&cTest"
+        gui-name: "&6Test"
+        lore:
+          - "&6Enter a hard map"
+        commands:
+          - "say test %adventurebgs_current_world_id%"
+
 
 broadcast:
-  warn-minutes: 5 # Broadcast this many minutes before rotation
-  warn-message: "&e[Adventure] Map &a%current_map% &ecloses in &c%minutes% &eminutes!"
-  new-map-message: "&a[Adventure] New map is now open: &b%new_map%!"
+  warn-minutes: 1 # Broadcast this many minutes before rotation
+  warn-message: "&e[Adventure] Map &a%current_map% &ecloses in &c%minutes% &eminutes!."
+  new-map-message: "&a[Adventure] New map is now open: &b%current_map%!"
 
 penalty:
   message: "&cThe map has collapsed! You are consumed by darkness..."
@@ -41,8 +69,8 @@ penalty:
 
 extraction:
   duration: 5 # seconds to stand in zone
-  down-time: 20
-  portal-restore-time: 3
+  portal-open-seconds: 5
+  down-seconds: 7
   spawn:
     world: "spawn"
     x: 0
@@ -50,19 +78,19 @@ extraction:
     z: 0
   message:
     start: "&eExtraction starting in %seconds%s!"
-    title: "&aExtracting... %seconds%s"
+    boss-title: "&aExtracting... %seconds%s"
     success: "&aExtraction successful!"
     portal-open: "&bPortal is open for %seconds%s!"
     down: "&cExtraction zone is down for %seconds%s!"
     cancel: "&cExtraction canceled!"
   zones:
-    adventure_world_1:
-      - min: [0, 64, 0]
+    sahara:
+      - min: [0, -60, 0]
         max: [10, 70, 10]
-        portal_min: [0, 0, 0]
-        portal_max: [0, 0, 0]
-        beacon_loc: []
-        particle_loc: []
+        portal_min: [0, -60, 0]
+        portal_max: [5, -55, 5]
+        beacon_loc: [4, -63, 7]
+        particle_loc: [0, -55, 0]
       - min: [20, 64, 20]
         max: [30, 70, 30]
     adventure_world_2:
@@ -70,39 +98,20 @@ extraction:
         max: [110, 70, 110]
   alert-seconds: 3 # how many seconds before extraction to trigger alert
   alert:
-      particles: true
-      fireworks: true
-      sound: ENTITY_ENDER_DRAGON_GROWL
-      location:
-        use-player: true # true = play at extracting player's position, false = fixed coords
-        world: "adventure_world_1"
-        x: 50
-        y: 70
-        z: 50
-
-gui:
-  title: "&6Adventure Menu"
-
-  teleport:
-    slot: 13
-    name: "&aEnter: %current_world%"
-    lore:
-      - "&7Click to begin your adventure!"
-      - "&7You are entering: %current_world%"
-
-  info:
-    slot: 22
-    name: "&eCycle Info"
-    lore:
-      - "&7Closes in: %minutes_left% minutes"
-      - "&7Next map: %next_world%"
-      -
+    particles: true
+    fireworks: true
+    sound: ENTITY_ENDER_DRAGON_GROWL
+    location:
+      use-player: true # true = play at extracting player's position, false = fixed coords
+      world: "adventure_world_1"
+      x: 50
+      y: 70
+      z: 50
 
 weather:
   - type: blizzard
     world: icycavern
-    min_duration: 5 # seconds
-    max_duration: 30
-    min_frequency: 2 # minutes
-    max_frequency: 5 # minutes
-    # properties: []
+    min_duration: 20 # seconds
+    max_duration: 50
+    min_frequency: 1 # minutes
+    max_frequency: 1 # minutes
