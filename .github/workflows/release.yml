@@ -36,5 +36,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # This installs the engine AND the maven plugin together
-          npm install @semantic-release/commit-analyzer @semantic-release/release-notes-generator @conveyal/semantic-release-maven @semantic-release/github @semantic-release/git @semantic-release/changelog
+          npm install @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/git @semantic-release/github @semantic-release/exec
           npx semantic-release
