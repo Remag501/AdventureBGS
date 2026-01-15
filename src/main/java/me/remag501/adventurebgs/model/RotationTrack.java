@@ -1,5 +1,7 @@
 package me.remag501.adventurebgs.model;
 
+import org.bukkit.boss.BossBar;
+
 import javax.sound.midi.Track;
 import java.time.Duration;
 import java.time.Instant;
@@ -16,6 +18,9 @@ public final class RotationTrack {
     // Cached state (updated once per second)
     private long secondsUntilNextCycle;
     private boolean newCycle;
+    private boolean hasBroadcasted = false;
+
+    private BossBar warningBossBar;
 
 
     public RotationTrack(String id,
@@ -86,6 +91,26 @@ public final class RotationTrack {
 
     public TrackGuiConfig getGui() {
         return gui;
+    }
+
+    public void setNewCycle(boolean newCycle) {
+        this.newCycle = newCycle;
+    }
+
+    public boolean isHasBroadcasted() {
+        return hasBroadcasted;
+    }
+
+    public void setHasBroadcasted(boolean hasBroadcasted) {
+        this.hasBroadcasted = hasBroadcasted;
+    }
+
+    public BossBar getWarningBossBar() {
+        return warningBossBar;
+    }
+
+    public void setWarningBossBar(BossBar warningBossBar) {
+        this.warningBossBar = warningBossBar;
     }
 
 }

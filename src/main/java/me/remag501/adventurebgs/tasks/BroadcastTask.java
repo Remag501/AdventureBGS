@@ -26,9 +26,9 @@ public class BroadcastTask implements Runnable {
     private final RotationManager rotationManager;
 
     private AdventureSettings settings;
-    private boolean hasBroadcasted = false;
     private BukkitRunnable warningTask;
-    private BossBar warningBossBar;
+//    private boolean hasBroadcasted = false;
+//    private BossBar warningBossBar;
     private Consumer<String> onTimeUp;
 
     public BroadcastTask(AdventureBGS plugin, RotationManager rotationManager, AdventureSettings settings) {
@@ -54,7 +54,7 @@ public class BroadcastTask implements Runnable {
             // =======================
             // WARNING PHASE
             // =======================
-            if (secondsLeft <= warnSeconds && secondsLeft > warnSeconds - 20 && !hasBroadcasted) {
+            if (secondsLeft <= warnSeconds && secondsLeft > warnSeconds - 20 && !rotationTrack.isHasBroadcasted()) {
 
                 String msg = settings.getWarnMessage();
                 String formattedMsg = MessageUtil.format(msg, currentMap, nextMap, minutesLeft);
@@ -81,7 +81,7 @@ public class BroadcastTask implements Runnable {
                 runWorldCommands(null, rotationTrack.getNextWorld());
 
                 startWarningCountdown(rotationTrack);
-                hasBroadcasted = true;
+                rotationTrack.setHasBroadcasted(true);
             }
 
             // =======================
@@ -92,8 +92,8 @@ public class BroadcastTask implements Runnable {
                 String msg = settings.getNewMapMessage();
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
 
-                stopWarningCountdown();
-                hasBroadcasted = false;
+                stopWarningCountdown(rotationTrack.getWarningBossBar());
+                rotationTrack.setHasBroadcasted(false);
             }
 
         }
@@ -128,11 +128,13 @@ public class BroadcastTask implements Runnable {
         World world = Bukkit.getWorld(worldInfo.getId());
         if (world == null) return;
 
-        warningBossBar = Bukkit.createBossBar(
+        BossBar warningBossBar = Bukkit.createBossBar(
                 "Map closes in " + totalSeconds + "s",
                 BarColor.RED,
                 BarStyle.SOLID
         );
+
+        rotation.setWarningBossBar(warningBossBar);
 
         // Add existing players
         world.getPlayers().forEach(warningBossBar::addPlayer);
@@ -145,7 +147,7 @@ public class BroadcastTask implements Runnable {
 
                 if (timeLeft <= 0 || rotation.isNewCycle()) {
                     // Apply penalty to OLD map
-                    stopWarningCountdown();
+                    stopWarningCountdown(warningBossBar);
                     return;
                 }
 
@@ -186,7 +188,7 @@ public class BroadcastTask implements Runnable {
 
     }
 
-    private void stopWarningCountdown() {
+    private void stopWarningCountdown(BossBar warningBossBar) {
         if (warningTask != null) {
             warningTask.cancel();
             warningTask = null;
@@ -194,14 +196,7 @@ public class BroadcastTask implements Runnable {
 
         if (warningBossBar != null) {
             warningBossBar.removeAll();
-            warningBossBar = null;
         }
     }
 
-    // =======================
-    // ACCESS FOR LISTENER
-    // =======================
-    public BossBar getWarningBossBar() {
-        return warningBossBar;
-    }
 }

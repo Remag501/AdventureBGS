@@ -4,6 +4,7 @@ import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.AdventureSettings;
 import me.remag501.adventurebgs.SettingsProvider;
 import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
@@ -25,8 +26,10 @@ public class BroadcastListener implements Listener {
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
 
-        BossBar bar = task.getWarningBossBar();
         Player player = event.getPlayer();
+        RotationTrack track = rotationManager.getTrackByWorld(player.getWorld());
+        if (track == null) return;
+        BossBar bar = track.getWarningBossBar();
         if (bar == null) return;
 
         String activeWorld = rotationManager.getTrackByWorld(player.getWorld()).getCurrentWorld().getId();
