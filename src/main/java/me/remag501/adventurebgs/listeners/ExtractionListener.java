@@ -1,7 +1,7 @@
 package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.SettingsProvider;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.managers.ExtractionManager;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.ExtractionZone;

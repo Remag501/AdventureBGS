@@ -1,4 +1,4 @@
-package me.remag501.adventurebgs;
+package me.remag501.adventurebgs.setting;
 
 import me.remag501.adventurebgs.model.*;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.time.Instant;
 import java.util.*;

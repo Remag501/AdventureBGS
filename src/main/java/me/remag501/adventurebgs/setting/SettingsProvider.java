@@ -1,4 +1,6 @@
-package me.remag501.adventurebgs;
+package me.remag501.adventurebgs.setting;
+
+import me.remag501.adventurebgs.AdventureBGS;
 
 public class SettingsProvider {
 

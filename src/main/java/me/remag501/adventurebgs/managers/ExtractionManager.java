@@ -1,10 +1,8 @@
 package me.remag501.adventurebgs.managers;
 
-import me.remag501.adventurebgs.AdventureSettings;
+import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.ExtractionZone;
 import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 

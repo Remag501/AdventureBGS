@@ -1,18 +1,12 @@
 package me.remag501.adventurebgs.listeners;
 
-import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.AdventureSettings;
-import me.remag501.adventurebgs.SettingsProvider;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
-import org.bukkit.Rotation;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.plugin.Plugin;
 
 public class BroadcastListener implements Listener {
 

@@ -7,12 +7,12 @@ import me.remag501.adventurebgs.listeners.GuiListener;
 import me.remag501.adventurebgs.listeners.JoinListener;
 import me.remag501.adventurebgs.managers.*;
 import me.remag501.adventurebgs.placeholder.BGSExpansion;
+import me.remag501.adventurebgs.setting.AdventureSettings;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
-import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 
 public class AdventureBGS extends JavaPlugin {
 

@@ -1,7 +1,7 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.AdventureSettings;
+import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.WeatherModel;
 import me.remag501.adventurebgs.weather.BlizzardWeather;
 import me.remag501.adventurebgs.weather.WeatherEffect;
@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

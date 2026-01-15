@@ -1,7 +1,7 @@
 package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.SettingsProvider;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.util.MessageUtil;
@@ -13,7 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 
 public class GuiListener implements Listener {
 

@@ -1,15 +1,12 @@
 package me.remag501.adventurebgs.managers;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.AdventureSettings;
+import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 
 //public class RotationManager {
