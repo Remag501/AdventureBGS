@@ -26,7 +26,7 @@ public class BroadcastTask implements Runnable {
     private final RotationManager rotationManager;
 
     private AdventureSettings settings;
-    private BukkitRunnable warningTask;
+//    private BukkitRunnable warningTask;
 //    private boolean hasBroadcasted = false;
 //    private BossBar warningBossBar;
     private Consumer<String> onTimeUp;
@@ -92,7 +92,7 @@ public class BroadcastTask implements Runnable {
                 String msg = settings.getNewMapMessage();
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
 
-                stopWarningCountdown(rotationTrack.getWarningBossBar());
+                stopWarningCountdown(rotationTrack);
                 rotationTrack.setHasBroadcasted(false);
             }
 
@@ -139,7 +139,7 @@ public class BroadcastTask implements Runnable {
         // Add existing players
         world.getPlayers().forEach(warningBossBar::addPlayer);
 
-        warningTask = new BukkitRunnable() {
+        BukkitRunnable warningTask = new BukkitRunnable() {
             long timeLeft = totalSeconds;
 
             @Override
@@ -147,7 +147,7 @@ public class BroadcastTask implements Runnable {
 
                 if (timeLeft <= 0 || rotation.isNewCycle()) {
                     // Apply penalty to OLD map
-                    stopWarningCountdown(warningBossBar);
+                    stopWarningCountdown(rotation);
                     return;
                 }
 
@@ -174,6 +174,8 @@ public class BroadcastTask implements Runnable {
             }
         };
 
+        rotation.setWarningTask(warningTask);
+
         warningTask.runTaskTimer(plugin, 0L, 20L);
 
         // Apply penalty after warning ticks
@@ -188,14 +190,18 @@ public class BroadcastTask implements Runnable {
 
     }
 
-    private void stopWarningCountdown(BossBar warningBossBar) {
+    private void stopWarningCountdown(RotationTrack rotation) {
+        BukkitRunnable warningTask = rotation.getWarningTask();
         if (warningTask != null) {
             warningTask.cancel();
             warningTask = null;
         }
 
+        BossBar warningBossBar = rotation.getWarningBossBar();
+
         if (warningBossBar != null) {
             warningBossBar.removeAll();
+            rotation.setWarningBossBar(warningBossBar);
         }
     }
 

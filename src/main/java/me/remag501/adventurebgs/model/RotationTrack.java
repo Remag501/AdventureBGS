@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs.model;
 
 import org.bukkit.boss.BossBar;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.sound.midi.Track;
 import java.time.Duration;
@@ -21,6 +22,7 @@ public final class RotationTrack {
     private boolean hasBroadcasted = false;
 
     private BossBar warningBossBar;
+    private BukkitRunnable warningTask;
 
 
     public RotationTrack(String id,
@@ -111,6 +113,14 @@ public final class RotationTrack {
 
     public void setWarningBossBar(BossBar warningBossBar) {
         this.warningBossBar = warningBossBar;
+    }
+
+    public BukkitRunnable getWarningTask() {
+        return warningTask;
+    }
+
+    public void setWarningTask(BukkitRunnable warningTask) {
+        this.warningTask = warningTask;
     }
 
 }

@@ -6,6 +6,7 @@ import me.remag501.adventurebgs.SettingsProvider;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.tasks.BroadcastTask;
+import org.bukkit.Rotation;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,19 +27,33 @@ public class BroadcastListener implements Listener {
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
 
-        Player player = event.getPlayer();
-        RotationTrack track = rotationManager.getTrackByWorld(player.getWorld());
-        if (track == null) return;
-        BossBar bar = track.getWarningBossBar();
-        if (bar == null) return;
+//        Player player = event.getPlayer();
+//        RotationTrack track = rotationManager.getTrackByWorld(player.getWorld());
+//        if (track == null) return;
+//        BossBar bar = track.getWarningBossBar();
+//        if (bar == null) return;
+//
+//        String activeWorld = rotationManager.getTrackByWorld(player.getWorld()).getCurrentWorld().getId();
+//
+//        if (event.getPlayer().getWorld().getName().equals(activeWorld)) {
+//            bar.addPlayer(event.getPlayer());
+//        } else {
+//            bar.removePlayer(event.getPlayer());
+//        }
 
-        String activeWorld = rotationManager.getTrackByWorld(player.getWorld()).getCurrentWorld().getId();
+        for (RotationTrack track: rotationManager.getTracks()) {
 
-        if (event.getPlayer().getWorld().getName().equals(activeWorld)) {
-            bar.addPlayer(event.getPlayer());
-        } else {
-            bar.removePlayer(event.getPlayer());
+            String activeWorld = track.getCurrentWorld().getId();
+            BossBar bar = track.getWarningBossBar();
+            if (bar == null) continue;
+
+            if (event.getPlayer().getWorld().getName().equals(activeWorld)) {
+                bar.addPlayer(event.getPlayer());
+            }
+            else
+                bar.removePlayer(event.getPlayer());
         }
+
     }
 
 
