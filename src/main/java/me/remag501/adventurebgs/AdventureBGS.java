@@ -66,7 +66,7 @@ public class AdventureBGS extends JavaPlugin {
 
         // Register placeholder
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new BGSExpansion(this).register();
+            new BGSExpansion(rotationManager).register();
             getLogger().info("AdventureBGS Placeholders registered!");
         }
     }

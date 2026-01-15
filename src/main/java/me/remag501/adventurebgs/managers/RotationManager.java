@@ -134,6 +134,10 @@ public class RotationManager {
         return worldToTrack.get(world.getName());
     }
 
+    public RotationTrack getTrackById(String id) {
+        return tracks.get(id);
+    }
+
     public Collection<RotationTrack> getTracks() {
         return tracks.values();
     }
