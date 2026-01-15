@@ -53,7 +53,7 @@ public class AdventureBGS extends JavaPlugin {
 //        preloadWorlds();
 
         // Register commands
-        getCommand("adventure").setExecutor(new AdventureCommand(this, guiManager));
+        getCommand("adventure").setExecutor(new AdventureCommand(this, rotationManager, guiManager));
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager, rotationManager, provider), this);
