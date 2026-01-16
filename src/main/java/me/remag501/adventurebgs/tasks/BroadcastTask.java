@@ -90,6 +90,7 @@ public class BroadcastTask implements Runnable {
                 String msg = settings.getNewMapMessage();
                 Bukkit.broadcastMessage(MessageUtil.format(msg, currentMap, nextMap, 0));
 
+//                Bukkit.getLogger().info("Reached logic to stop via check new cycle within track");
                 stopWarningCountdown(rotationTrack);
                 rotationTrack.setHasBroadcasted(false);
             }
@@ -145,6 +146,7 @@ public class BroadcastTask implements Runnable {
 
                 if (timeLeft <= 0 || rotation.isNewCycle()) {
                     // Apply penalty to OLD map
+//                    Bukkit.getLogger().info("Reached logic to stop via timer" + rotation.getId()); // why this not proc tho
                     stopWarningCountdown(rotation);
                     return;
                 }
@@ -188,7 +190,7 @@ public class BroadcastTask implements Runnable {
 
     }
 
-    private void stopWarningCountdown(RotationTrack rotation) {
+    private synchronized void stopWarningCountdown(RotationTrack rotation) {
         BukkitRunnable warningTask = rotation.getWarningTask();
         if (warningTask != null) {
             warningTask.cancel();
@@ -196,10 +198,11 @@ public class BroadcastTask implements Runnable {
         }
 
         BossBar warningBossBar = rotation.getWarningBossBar();
+        Bukkit.getLogger().info("Emptying out boss bar for rotation track " + rotation.getId());
 
         if (warningBossBar != null) {
             warningBossBar.removeAll();
-            rotation.setWarningBossBar(warningBossBar);
+            rotation.setWarningBossBar(null); // try setting to null?
         }
     }
 

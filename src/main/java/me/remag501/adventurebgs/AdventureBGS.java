@@ -23,6 +23,7 @@ public class AdventureBGS extends JavaPlugin {
     private WeatherManager weatherManager;
     private BroadcastTask broadcastTask;
     private DeathManager deathManager;
+    private PDCManager pdcManager;
 
     private AdventureSettings settings;
     private SettingsProvider provider;
@@ -39,6 +40,7 @@ public class AdventureBGS extends JavaPlugin {
         // 1. Independent Managers (Leaves)
         this.extractionManager = new ExtractionManager(settings);
         this.deathManager = new DeathManager(this);
+        this.pdcManager = new PDCManager(this);
         this.rotationManager = new RotationManager(this, settings);
 
         // 2. Managers that need Rotation (Workers)
@@ -46,19 +48,19 @@ public class AdventureBGS extends JavaPlugin {
         this.weatherManager = new WeatherManager(this, settings);
 
         // 3. Complex Managers (Controllers)
-        this.penaltyManager = new PenaltyManager(this, rotationManager, broadcastTask, settings);
+        this.penaltyManager = new PenaltyManager(this, pdcManager, rotationManager, broadcastTask, settings);
         this.guiManager = new GuiManager(this, rotationManager, settings);
 
         // Preload all configured worlds
 //        preloadWorlds();
 
         // Register commands
-        getCommand("adventure").setExecutor(new AdventureCommand(this, rotationManager, guiManager));
+        getCommand("adventure").setExecutor(new AdventureCommand(this, pdcManager, rotationManager, guiManager));
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager, rotationManager, provider), this);
-        getServer().getPluginManager().registerEvents(new JoinListener(this, penaltyManager), this);
-        getServer().getPluginManager().registerEvents(new GuiListener(this, rotationManager, provider), this);
+        getServer().getPluginManager().registerEvents(new JoinListener(pdcManager, rotationManager, penaltyManager), this);
+        getServer().getPluginManager().registerEvents(new GuiListener(this, pdcManager, rotationManager, provider), this);
         getServer().getPluginManager().registerEvents(new BroadcastListener(rotationManager, broadcastTask), this);
 
         // Start broadcasting messages

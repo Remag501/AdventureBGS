@@ -2,6 +2,7 @@ package me.remag501.adventurebgs.commands;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.managers.GuiManager;
+import me.remag501.adventurebgs.managers.PDCManager;
 import me.remag501.adventurebgs.managers.RotationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,11 +20,13 @@ import java.util.List;
 public class AdventureCommand implements CommandExecutor {
 
     private final AdventureBGS plugin;
+    private final PDCManager pdcManager;
     private final GuiManager guiManager;
     private final RotationManager rotationManager;
 
-    public AdventureCommand(AdventureBGS plugin, RotationManager rotationManager, GuiManager guiManager) {
+    public AdventureCommand(AdventureBGS plugin, PDCManager pdcManager, RotationManager rotationManager, GuiManager guiManager) {
         this.plugin = plugin;
+        this.pdcManager = pdcManager;
         this.guiManager = guiManager;
         this.rotationManager = rotationManager;
     }
@@ -55,6 +58,7 @@ public class AdventureCommand implements CommandExecutor {
             // Handle teleport logic
             String currentWorld = rotationManager.getTrackById(trackName).getCurrentWorld().getId();
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + playerName + " " + currentWorld);
+            pdcManager.syncPlayerToWorld(Bukkit.getPlayer(playerName), Bukkit.getWorld(currentWorld));
 
             sender.sendMessage("Attempting to teleport " + playerName + " to track: " + trackName);
 

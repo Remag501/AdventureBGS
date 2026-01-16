@@ -1,6 +1,7 @@
 package me.remag501.adventurebgs.listeners;
 
 import me.remag501.adventurebgs.AdventureBGS;
+import me.remag501.adventurebgs.managers.PDCManager;
 import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.managers.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
@@ -19,9 +20,11 @@ public class GuiListener implements Listener {
     private final RotationManager rotationManager;
     private final SettingsProvider provider;
     private final AdventureBGS plugin;
+    private final PDCManager pdcManager;
 
-    public GuiListener(AdventureBGS plugin, RotationManager rotationManager, SettingsProvider provider) {
+    public GuiListener(AdventureBGS plugin, PDCManager pdcManager, RotationManager rotationManager, SettingsProvider provider) {
         this.plugin = plugin;
+        this.pdcManager = pdcManager;
         this.rotationManager = rotationManager;
         this.provider = provider;
     }
@@ -50,6 +53,7 @@ public class GuiListener implements Listener {
                     String currentWorld = rotationTrack.getCurrentWorld().getId();
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + player.getName() + " " + currentWorld);
                     player.closeInventory();
+                    pdcManager.syncPlayerToWorld(player, Bukkit.getWorld(currentWorld));
                     break;
                 }
             }

@@ -15,12 +15,14 @@ public class PenaltyManager {
     private final AdventureBGS plugin;
     private final BroadcastTask broadcastTask;
     private final RotationManager rotationManager;
+    private final PDCManager pdcManager;
 
     private AdventureSettings settings;
 
 
-    public PenaltyManager(AdventureBGS plugin, RotationManager rotationManager, BroadcastTask broadcastTask, AdventureSettings settings) {
+    public PenaltyManager(AdventureBGS plugin, PDCManager pdcManager, RotationManager rotationManager, BroadcastTask broadcastTask, AdventureSettings settings) {
         this.plugin = plugin;
+        this.pdcManager = pdcManager;
         this.broadcastTask = broadcastTask;
         this.settings = settings;
         this.rotationManager = rotationManager;
@@ -59,7 +61,8 @@ public class PenaltyManager {
         }
 
         // Kill any players who logged out
-        updateWorldVersion(Bukkit.getWorld(closedWorldName));
+//        updateWorldVersion(Bukkit.getWorld(closedWorldName));
+        pdcManager.incrementWorldVersion(Bukkit.getWorld(closedWorldName));
 
     }
 
@@ -84,13 +87,13 @@ public class PenaltyManager {
         ));
     }
 
-    public void updateWorldVersion(World world) {
-        NamespacedKey key = new NamespacedKey(plugin, "map_version");
-        int currentVersion = world.getPersistentDataContainer().getOrDefault(key, PersistentDataType.INTEGER, 0);
-
-        // Increment the version so old player "tickets" become invalid
-        world.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, currentVersion + 1);
-    }
+//    public void updateWorldVersion(World world) {
+//        NamespacedKey key = new NamespacedKey(plugin, "map_version");
+//        int currentVersion = world.getPersistentDataContainer().getOrDefault(key, PersistentDataType.INTEGER, 0);
+//
+//        // Increment the version so old player "tickets" become invalid
+//        world.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, currentVersion + 1);
+//    }
 
     public void startBroadcastTask() {
         Bukkit.getScheduler().runTaskTimer(plugin, broadcastTask, 20L, 20L);
