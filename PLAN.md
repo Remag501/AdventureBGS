@@ -13,6 +13,11 @@ This document outlines a comprehensive plan for unit testing the AdventureBGS pl
 
 ## Further Guidelines for Effective Unit Testing:
 
+### Constructor-based Dependency Injection
+
+-   All dependencies for classes under test (including `AdventureBGS` itself if tested via MockBukkit) should be provided via their constructors. This allows for easy swapping of real implementations with Mockito stubs (for internal service classes) or MockBukkit entities (for Bukkit API components) during testing.
+-   When MockBukkit loads the `AdventureBGS` plugin, the resulting `AdventureBGS` instance is treated as a "real" object within the simulated environment. If `AdventureBGS` has its own internal dependencies that need to be mocked for a specific test, ensure `AdventureBGS` itself uses constructor injection to allow these dependencies to be provided as Mockito stubs during the test setup.
+
 ### Aligning Test Expectations with Actual Code Behavior and API Contracts
 
 -   Ensure that test expectations (e.g., method calls, message content) precisely match the actual behavior of the code under test, especially when interacting with the Bukkit API.
