@@ -1,4 +1,4 @@
-package me.remag501.adventurebgs.managers;
+package me.remag501.adventurebgs.manager;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;

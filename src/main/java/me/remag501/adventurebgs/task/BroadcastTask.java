@@ -1,9 +1,9 @@
-package me.remag501.adventurebgs.tasks;
+package me.remag501.adventurebgs.task;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;
-import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;

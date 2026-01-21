@@ -1,8 +1,8 @@
-package me.remag501.adventurebgs.listeners;
+package me.remag501.adventurebgs.listener;
 
-import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
-import me.remag501.adventurebgs.tasks.BroadcastTask;
+import me.remag501.adventurebgs.task.BroadcastTask;
 import org.bukkit.boss.BossBar;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

@@ -1,4 +1,4 @@
-package me.remag501.adventurebgs.managers;
+package me.remag501.adventurebgs.manager;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import org.bukkit.Bukkit;
@@ -6,7 +6,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class PDCManager {
 

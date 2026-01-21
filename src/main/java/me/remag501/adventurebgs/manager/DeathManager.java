@@ -1,12 +1,8 @@
-package me.remag501.adventurebgs.managers;
+package me.remag501.adventurebgs.manager;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;

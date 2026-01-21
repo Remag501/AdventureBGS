@@ -1,21 +1,14 @@
-package me.remag501.adventurebgs.commands;
+package me.remag501.adventurebgs.command;
 
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.managers.GuiManager;
-import me.remag501.adventurebgs.managers.PDCManager;
-import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.manager.GuiManager;
+import me.remag501.adventurebgs.manager.PDCManager;
+import me.remag501.adventurebgs.manager.RotationManager;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Rotation;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class AdventureCommand implements CommandExecutor {
 

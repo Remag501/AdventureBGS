@@ -1,12 +1,11 @@
-package me.remag501.adventurebgs.managers;
+package me.remag501.adventurebgs.manager;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;
-import me.remag501.adventurebgs.tasks.BroadcastTask;
+import me.remag501.adventurebgs.task.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 

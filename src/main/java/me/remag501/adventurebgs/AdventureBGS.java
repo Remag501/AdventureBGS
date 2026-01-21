@@ -1,15 +1,15 @@
 package me.remag501.adventurebgs;
 
-import me.remag501.adventurebgs.commands.AdventureCommand;
-import me.remag501.adventurebgs.listeners.BroadcastListener;
-import me.remag501.adventurebgs.listeners.ExtractionListener;
-import me.remag501.adventurebgs.listeners.GuiListener;
-import me.remag501.adventurebgs.listeners.JoinListener;
-import me.remag501.adventurebgs.managers.*;
+import me.remag501.adventurebgs.command.AdventureCommand;
+import me.remag501.adventurebgs.listener.BroadcastListener;
+import me.remag501.adventurebgs.listener.ExtractionListener;
+import me.remag501.adventurebgs.listener.GuiListener;
+import me.remag501.adventurebgs.listener.JoinListener;
+import me.remag501.adventurebgs.manager.*;
 import me.remag501.adventurebgs.placeholder.BGSExpansion;
 import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.setting.SettingsProvider;
-import me.remag501.adventurebgs.tasks.BroadcastTask;
+import me.remag501.adventurebgs.task.BroadcastTask;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import org.bukkit.Bukkit;

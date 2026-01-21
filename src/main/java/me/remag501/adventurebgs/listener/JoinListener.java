@@ -1,22 +1,14 @@
-package me.remag501.adventurebgs.listeners;
+package me.remag501.adventurebgs.listener;
 
-import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.managers.DeathManager;
-import me.remag501.adventurebgs.managers.PDCManager;
-import me.remag501.adventurebgs.managers.PenaltyManager;
-import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.manager.PDCManager;
+import me.remag501.adventurebgs.manager.PenaltyManager;
+import me.remag501.adventurebgs.manager.RotationManager;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.UUID;
 
 public class JoinListener implements Listener {
 

@@ -1,8 +1,7 @@
 package me.remag501.adventurebgs.placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.util.MessageUtil;
 import org.bukkit.OfflinePlayer;

@@ -3,13 +3,12 @@ package me.remag501.adventurebgs.listener;
 
 
 import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.MockPlugin;
 import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.managers.PDCManager;
-import me.remag501.adventurebgs.managers.PenaltyManager;
-import me.remag501.adventurebgs.managers.RotationManager;
+import me.remag501.adventurebgs.manager.PDCManager;
+import me.remag501.adventurebgs.manager.PenaltyManager;
+import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import org.bukkit.World;
 import org.bukkit.event.player.PlayerJoinEvent;
