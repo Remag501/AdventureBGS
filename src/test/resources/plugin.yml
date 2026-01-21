@@ -1,0 +1,14 @@
+name: AdventureBGS
+version: '${project.version}'
+main: me.remag501.adventurebgs.AdventureBGS
+api-version: '1.19'
+
+commands:
+  adventure:
+    description: Teleport to the current adventure world
+    usage: /adventure
+
+depend:
+  - Multiverse-Core
+  - BetterRTP
+  - PlaceholderAPI
