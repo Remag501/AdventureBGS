@@ -1,5 +1,6 @@
 package me.remag501.adventurebgs.listener;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.manager.ExtractionManager;
@@ -403,15 +404,20 @@ public class ExtractionListener implements Listener {
         if (world == null) return;
 
         // 2. Play sound to ALL players in the extraction world
-        try {
-            Sound alertSound = Sound.valueOf(rawSound.toUpperCase());
-            for (Player p : world.getPlayers()) {
-                // Play sound localized to the zone's beacon/particle location
-                Location soundLoc = zone.getBeaconLoc() != null ? zone.getBeaconLoc() : p.getLocation();
-                p.playSound(soundLoc, alertSound, 2.0f, 1.0f);
-            }
-        } catch (IllegalArgumentException e) {
-            plugin.getLogger().warning("Invalid sound configured for extraction alert: " + rawSound);
+
+        // Note: Minecraft keys use dots or underscores, but Registry is flexible.
+        NamespacedKey soundKey = NamespacedKey.minecraft(rawSound.toLowerCase().replace("entity_ender_dragon_growl", "entity.ender_dragon.ambient"));
+        // Look it up in the SOUNDS registry
+        Sound alertSound = Registry.SOUNDS.get(soundKey);
+        // Null check (Registry.get returns null if not found)
+        if (alertSound == null) {
+            alertSound = Sound.ENTITY_ENDER_DRAGON_GROWL;
+        }
+
+        for (Player p : world.getPlayers()) {
+            // Play sound localized to the zone's beacon/particle location
+            Location soundLoc = zone.getBeaconLoc() != null ? zone.getBeaconLoc() : p.getLocation();
+            p.playSound(soundLoc, alertSound, 2.0f, 1.0f);
         }
 
         // 3. Spawn particles at the specified location (beacon or particle location)
@@ -419,15 +425,15 @@ public class ExtractionListener implements Listener {
         if (particleLoc != null) {
             // Create a burst of particles simulating a flare or fireworks to draw attention
 
-            // Large upward visual flare (Fireworks Spark)
-            world.spawnParticle(Particle.FIREWORKS_SPARK, particleLoc, 100, 0.5, 0.5, 0.5, 0.5);
+            // Large upward visual flare (FIREWORK_ROCKET instead of FIREWORKS_SPARK)
+            world.spawnParticle(Particle.FIREWORK, particleLoc, 100, 0.5, 0.5, 0.5, 0.5);
 
-            // Colored smoke/dust trail for drama (Green and Yellow)
-            world.spawnParticle(Particle.REDSTONE, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.LIME, 1.5f));
-            world.spawnParticle(Particle.REDSTONE, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1.5f));
+            // Colored smoke/dust trail (DUST instead of REDSTONE)
+            world.spawnParticle(Particle.DUST, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.LIME, 1.5f));
+            world.spawnParticle(Particle.DUST, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1.5f));
 
-            // Instantaneous large explosion effect for emphasis
-            world.spawnParticle(Particle.EXPLOSION_LARGE, particleLoc, 1, 0, 0, 0, 0);
+            // Instantaneous large explosion (EXPLOSION instead of EXPLOSION_LARGE)
+            world.spawnParticle(Particle.EXPLOSION, particleLoc, 1, 0, 0, 0, 0);
         }
     }
 }
