@@ -10,6 +10,11 @@ import me.remag501.adventurebgs.placeholder.BGSExpansion;
 import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.task.BroadcastTask;
+import me.remag501.bgscore.api.BGSApi;
+import me.remag501.bgscore.api.command.CommandService;
+import me.remag501.bgscore.api.event.EventService;
+import me.remag501.bgscore.api.namespace.NamespaceService;
+import me.remag501.bgscore.api.task.TaskService;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import org.bukkit.Bukkit;
@@ -22,7 +27,6 @@ public class AdventureBGS extends JavaPlugin {
     private PenaltyManager penaltyManager;
     private WeatherManager weatherManager;
     private BroadcastTask broadcastTask;
-    private DeathManager deathManager;
     private PDCManager pdcManager;
 
     private AdventureSettings settings;
@@ -36,23 +40,25 @@ public class AdventureBGS extends JavaPlugin {
         this.provider = new SettingsProvider(this);
         this.settings = provider.getSettings();
 
+        // Get services from BGS Api
+        EventService eventService = BGSApi.events();
+        TaskService taskService = BGSApi.tasks();
+        CommandService commandService = BGSApi.commands();
+        NamespaceService namespaceService = BGSApi.namespaces();
+
         // Initialize managers
-        // 1. Independent Managers (Leaves)
+        // Independent Managers (Leaves)
         this.extractionManager = new ExtractionManager(settings);
-        this.deathManager = new DeathManager(this);
         this.pdcManager = new PDCManager(this);
         this.rotationManager = new RotationManager(this, settings);
 
-        // 2. Managers that need Rotation (Workers)
+        // Managers that need Rotation (Workers)
         this.broadcastTask = new BroadcastTask(this, rotationManager, settings);
         this.weatherManager = new WeatherManager(this, settings);
 
-        // 3. Complex Managers (Controllers)
+        // Complex Managers (Controllers)
         this.penaltyManager = new PenaltyManager(this, pdcManager, rotationManager, broadcastTask, settings);
         this.guiManager = new GuiManager(this, rotationManager, settings);
-
-        // Preload all configured worlds
-//        preloadWorlds();
 
         // Register commands
         getCommand("adventure").setExecutor(new AdventureCommand(this, pdcManager, rotationManager, guiManager));
@@ -92,14 +98,4 @@ public class AdventureBGS extends JavaPlugin {
 
     }
 
-//    private void preloadWorlds() {
-//        for (String worldName : rotationManager.getWorlds()) {
-//            World world = Bukkit.getWorld(worldName);
-//            if (world == null) {
-//                getLogger().warning("World not loaded: " + worldName);
-//            } else {
-//                getLogger().info("Preloaded world: " + worldName);
-//            }
-//        }
-//    }
 }
