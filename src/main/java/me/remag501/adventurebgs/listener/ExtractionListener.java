@@ -8,6 +8,7 @@ import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.util.MessageUtil;
 import me.remag501.bgscore.api.event.EventService;
+import me.remag501.bgscore.api.task.TaskService;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -17,16 +18,19 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ExtractionListener {
 
-    private final AdventureBGS plugin;
+//    private final AdventureBGS plugin;
+    private final TaskService taskService;
     private final ExtractionManager extractionManager;
     private final RotationManager rotationManager;
     private final SettingsProvider provider;
 
-    public ExtractionListener(EventService eventService, AdventureBGS plugin, ExtractionManager extractionManager, RotationManager rotationManager, SettingsProvider provider) {
-        this.plugin = plugin;
+    public ExtractionListener(EventService eventService, TaskService taskService, AdventureBGS plugin, ExtractionManager extractionManager, RotationManager rotationManager, SettingsProvider provider) {
+//        this.plugin = plugin;
+        this.taskService = taskService;
         this.extractionManager = extractionManager;
         this.rotationManager = rotationManager;
         this.provider = provider;
@@ -75,7 +79,7 @@ public class ExtractionListener {
                 fromZone.removeExtractingPlayer(player);
 
                 if (fromZone.isEmpty()) {
-                    fromZone.cancelExtraction();
+                    fromZone.cancelExtraction(taskService);
                     String cancelMessage = MessageUtil.color(provider.getSettings().getExtractionCancel());
                     messagePlayersInZone(fromZone, cancelMessage);
                 }
@@ -126,42 +130,38 @@ public class ExtractionListener {
 
         zone.startExtraction(null, bossBar, player);
 
-        BukkitRunnable task = new BukkitRunnable() {
-            int timeLeft = provider.getSettings().getExtractionDuration();
-            boolean alertTriggered = false;
+        final int[] timeLeft = {provider.getSettings().getExtractionDuration()};
+        final AtomicBoolean[] alertTriggered = {new AtomicBoolean(false)};
 
-            @Override
-            public void run() {
+        taskService.subscribe(player.getUniqueId(), "extraction", 0, 20, (ticks) -> {
                 if (!zone.isExtracting() || zone.getExtractionBossBar() == null) {
-                    cancel();
-                    return;
+                    return true;
                 }
 
-                if (timeLeft <= 0) {
+                if (timeLeft[0] <= 0) {
                     if (!zone.isEmpty()) {
                         completeExtraction(zone);
                     } else {
-                        zone.cancelExtraction();
+                        zone.cancelExtraction(taskService);
                     }
-                    cancel();
-                    return;
+                    return true;
                 }
 
                 int alertSeconds = provider.getSettings().getAlertSeconds();
-                if (timeLeft == alertSeconds && !alertTriggered) {
+                if (timeLeft[0] == alertSeconds && !alertTriggered[0].get()) {
                     triggerAlert(zone);
-                    alertTriggered = true;
+                    alertTriggered[0].set(true);
                 }
 
-                zone.getExtractionBossBar().setProgress((double) timeLeft / provider.getSettings().getExtractionDuration());
-                String updatedTitle = title.replace("%seconds%", String.valueOf(timeLeft));
+                zone.getExtractionBossBar().setProgress((double) timeLeft[0] / provider.getSettings().getExtractionDuration());
+                String updatedTitle = title.replace("%seconds%", String.valueOf(timeLeft[0]));
                 zone.getExtractionBossBar().setTitle(updatedTitle);
-                timeLeft--;
-            }
-        };
+                timeLeft[0]--;
 
-        zone.setExtractionTask(task);
-        task.runTaskTimer(plugin, 0L, 20L);
+                return false;
+        });
+
+        zone.setExtractionTaskId(player.getUniqueId());
     }
 
     private void completeExtraction(ExtractionZone zone) {
@@ -169,7 +169,7 @@ public class ExtractionListener {
         if (world == null) return;
 
         Set<UUID> successfulPlayers = new HashSet<>(zone.getExtractingPlayers());
-        zone.cancelExtraction();
+        zone.cancelExtraction(taskService);
 
         String successMsg = MessageUtil.color(provider.getSettings().getExtractionSuccess());
 
@@ -210,13 +210,11 @@ public class ExtractionListener {
             }
         }
 
-        BukkitRunnable portalTask = new BukkitRunnable() {
-            int timeLeft = portalOpenSeconds;
-            @Override
-            public void run() {
-                if (timeLeft <= 0) {
+        final int[] timeLeft = {portalOpenSeconds};
+
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, 0, 20, (ticks) -> {
+                if (timeLeft[0] <= 0) {
                     portalBar.removeAll();
-                    cancel();
                     zone.setPortalOpen(false);
 
                     for (Map.Entry<Location, Material> entry : originalBlocks.entrySet()) {
@@ -240,31 +238,31 @@ public class ExtractionListener {
                     }
                     zone.setCooldownState(downBar);
 
-                    new BukkitRunnable() {
-                        int downTimeLeft = zoneDownSeconds;
-                        @Override
-                        public void run() {
-                            if (downTimeLeft <= 0) {
-                                downBar.removeAll();
-                                zone.endCooldown();
-                                updateBeaconColor(zone, Material.LIME_STAINED_GLASS, Material.LIME_STAINED_GLASS);
-                                messagePlayersInZone(zone, "&aExtraction zone is now open again!");
-                                cancel();
-                                return;
-                            }
-                            downBar.setProgress((double) downTimeLeft / zoneDownSeconds);
-                            downBar.setTitle("§cExtraction is down for §c§l" + downTimeLeft + " §cseconds...");
-                            downTimeLeft--;
+                    final int[] downTimeLeft = {zoneDownSeconds};
+
+                    taskService.subscribe(AdventureBGS.SYSTEM_ID, 0, 20, (tickss) -> {
+                        if (downTimeLeft[0] <= 0) {
+                            downBar.removeAll();
+                            zone.endCooldown();
+                            updateBeaconColor(zone, Material.LIME_STAINED_GLASS, Material.LIME_STAINED_GLASS);
+                            messagePlayersInZone(zone, "&aExtraction zone is now open again!");
+                            return true;
                         }
-                    }.runTaskTimer(plugin, 0L, 20L);
+                        downBar.setProgress((double) downTimeLeft[0] / zoneDownSeconds);
+                        downBar.setTitle("§cExtraction is down for §c§l" + downTimeLeft[0] + " §cseconds...");
+                        downTimeLeft[0]--;
+                        return false;
+                    });
+                    return true;
                 } else {
-                    portalBar.setProgress((double) timeLeft / portalOpenSeconds);
-                    portalBar.setTitle("§aPortal is open for §a§l" + timeLeft + " §aseconds...");
-                    timeLeft--;
+                    portalBar.setProgress((double) timeLeft[0] / portalOpenSeconds);
+                    portalBar.setTitle("§aPortal is open for §a§l" + timeLeft[0] + " §aseconds...");
+                    timeLeft[0]--;
                 }
-            }
-        };
-        portalTask.runTaskTimer(plugin, 0L, 20L);
+
+            return false;
+        });
+
     }
 
     private void updateBeaconColor(ExtractionZone zone, Material glassType1, Material glassType2) {
@@ -274,7 +272,7 @@ public class ExtractionListener {
         if (world == null) return;
 
         world.getChunkAtAsync(beaconLoc.getBlockX() >> 4, beaconLoc.getBlockZ() >> 4, false, chunk -> {
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            taskService.delay(0, () -> {
                 beaconLoc.clone().add(0, 1, 0).getBlock().setType(glassType1, false);
                 beaconLoc.clone().add(0, 2, 0).getBlock().setType(glassType2, false);
             });
