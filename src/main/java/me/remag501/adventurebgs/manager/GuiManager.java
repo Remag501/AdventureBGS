@@ -6,6 +6,7 @@ import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
 import me.remag501.adventurebgs.util.SkullUtil;
+import me.remag501.bgscore.api.namespace.NamespaceService;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -20,13 +21,13 @@ import java.util.stream.Collectors;
 
 public class GuiManager {
 
-    private AdventureSettings settings;
-
+    private final NamespaceService namespaceService;
     private final RotationManager rotationManager;
-    private final AdventureBGS plugin;
 
-    public GuiManager (AdventureBGS plugin, RotationManager manager, AdventureSettings settings) {
-        this.plugin = plugin;
+    private  AdventureSettings settings;
+
+    public GuiManager (NamespaceService namespaceService, RotationManager manager, AdventureSettings settings) {
+        this.namespaceService = namespaceService;
         this.rotationManager = manager;
         this.settings = settings;
     }
@@ -63,7 +64,7 @@ public class GuiManager {
             tpMeta.setLore(tpLore);
             // Add persistent data container for checking on listener
             String id = rotationTrack.getId();
-            NamespacedKey guiKey = new NamespacedKey(plugin, "world_id");
+            NamespacedKey guiKey = namespaceService.getWorldIdKey();
             tpMeta.getPersistentDataContainer().set(guiKey, PersistentDataType.STRING, id);
 
             teleportItem.setItemMeta(tpMeta);

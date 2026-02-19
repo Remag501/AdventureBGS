@@ -7,6 +7,7 @@ import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.util.MessageUtil;
 import me.remag501.bgscore.api.event.EventService;
+import me.remag501.bgscore.api.namespace.NamespaceService;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -18,13 +19,12 @@ public class GuiListener {
 
     private final RotationManager rotationManager;
     private final PDCManager pdcManager;
-    private final NamespacedKey worldIdKey;
+    private final NamespaceService namespaceService;
 
-    public GuiListener(EventService eventService, AdventureBGS plugin, PDCManager pdcManager, RotationManager rotationManager, SettingsProvider provider) {
+    public GuiListener(EventService eventService, NamespaceService namespaceService, PDCManager pdcManager, RotationManager rotationManager, SettingsProvider provider) {
         this.pdcManager = pdcManager;
         this.rotationManager = rotationManager;
-        // Pre-cache the key so we don't recreate it every click
-        this.worldIdKey = new NamespacedKey(plugin, "world_id");
+        this.namespaceService = namespaceService;
 
         eventService.subscribe(InventoryClickEvent.class)
                 // Filter: Only handle clicks in our specific GUI
@@ -43,7 +43,7 @@ public class GuiListener {
         if (event.getCurrentItem().getType() == Material.PLAYER_HEAD) {
             String actionId = event.getCurrentItem().getItemMeta()
                     .getPersistentDataContainer()
-                    .get(worldIdKey, PersistentDataType.STRING);
+                    .get(namespaceService.getWorldIdKey(), PersistentDataType.STRING);
 
             if (actionId == null) return;
 

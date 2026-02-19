@@ -47,13 +47,13 @@ public class AdventureBGS extends JavaPlugin {
         // Get services from BGS Api
         EventService eventService = BGSApi.events();
         TaskService taskService = BGSApi.tasks();
-        CommandService commandService = BGSApi.commands();
         NamespaceService namespaceService = BGSApi.namespaces();
+        CommandService commandService = BGSApi.commands();
 
         // Initialize managers
         // Independent Managers (Leaves)
         this.extractionManager = new ExtractionManager(settings);
-        this.pdcManager = new PDCManager(this);
+        this.pdcManager = new PDCManager(namespaceService);
         this.rotationManager = new RotationManager(taskService, settings);
 
         // Managers that need Rotation (Workers)
@@ -62,7 +62,7 @@ public class AdventureBGS extends JavaPlugin {
 
         // Complex Managers (Controllers)
         this.penaltyManager = new PenaltyManager(taskService, pdcManager, broadcastTask, settings);
-        this.guiManager = new GuiManager(this, rotationManager, settings);
+        this.guiManager = new GuiManager(namespaceService, rotationManager, settings);
 
         // Register commands
         getCommand("adventure").setExecutor(new AdventureCommand(this, pdcManager, rotationManager, guiManager));
@@ -73,7 +73,7 @@ public class AdventureBGS extends JavaPlugin {
 //        getServer().getPluginManager().registerEvents(, this);
         new JoinListener(eventService, pdcManager, rotationManager, penaltyManager);
 //        getServer().getPluginManager().registerEvents(, this);
-        new GuiListener(eventService, this, pdcManager, rotationManager, provider);
+        new GuiListener(eventService, namespaceService, pdcManager, rotationManager, provider);
 //        getServer().getPluginManager().registerEvents(, this);
         new BroadcastListener(eventService, rotationManager);
 
