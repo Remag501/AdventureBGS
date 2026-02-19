@@ -65,16 +65,14 @@ public class AdventureBGS extends JavaPlugin {
         this.guiManager = new GuiManager(namespaceService, rotationManager, settings);
 
         // Register commands
-        getCommand("adventure").setExecutor(new AdventureCommand(this, pdcManager, rotationManager, guiManager));
+        AdventureCommand adventureCommand = new AdventureCommand(this, pdcManager, rotationManager, guiManager);
+        getCommand("adventure").setExecutor(adventureCommand);
+        commandService.registerSubcommand("adventure", adventureCommand);
 
         // Register Listener
-//        getServer().getPluginManager().registerEvents(, this);
         new ExtractionListener(eventService, taskService, extractionManager, rotationManager, provider);
-//        getServer().getPluginManager().registerEvents(, this);
         new JoinListener(eventService, pdcManager, rotationManager, penaltyManager);
-//        getServer().getPluginManager().registerEvents(, this);
         new GuiListener(eventService, namespaceService, pdcManager, rotationManager, provider);
-//        getServer().getPluginManager().registerEvents(, this);
         new BroadcastListener(eventService, rotationManager);
 
         // Start broadcasting messages
