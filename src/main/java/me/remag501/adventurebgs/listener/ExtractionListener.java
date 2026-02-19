@@ -131,7 +131,7 @@ public class ExtractionListener {
         final int[] timeLeft = {provider.getSettings().getExtractionDuration()};
         final AtomicBoolean[] alertTriggered = {new AtomicBoolean(false)};
 
-        taskService.subscribe(player.getUniqueId(), "extraction", 0, 20, (ticks) -> {
+        taskService.subscribe(player.getUniqueId(), "extraction", 0, 20, false, (ticks) -> {
                 if (!zone.isExtracting() || zone.getExtractionBossBar() == null) {
                     return true;
                 }
@@ -210,7 +210,7 @@ public class ExtractionListener {
 
         final int[] timeLeft = {portalOpenSeconds};
 
-        taskService.subscribe(AdventureBGS.SYSTEM_ID, 0, 20, (ticks) -> {
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, "extraction_portal", 0, 20, false, (ticks) -> {
                 if (timeLeft[0] <= 0) {
                     portalBar.removeAll();
                     zone.setPortalOpen(false);
@@ -238,7 +238,7 @@ public class ExtractionListener {
 
                     final int[] downTimeLeft = {zoneDownSeconds};
 
-                    taskService.subscribe(AdventureBGS.SYSTEM_ID, 0, 20, (tickss) -> {
+                    taskService.subscribe(AdventureBGS.SYSTEM_ID, "extraction_beacon", 0, 20, false, (tickss) -> {
                         if (downTimeLeft[0] <= 0) {
                             downBar.removeAll();
                             zone.endCooldown();

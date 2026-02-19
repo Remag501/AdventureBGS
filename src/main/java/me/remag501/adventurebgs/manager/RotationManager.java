@@ -47,7 +47,7 @@ public class RotationManager {
 
     private void startTicker() {
 
-        taskService.subscribe(AdventureBGS.SYSTEM_ID, 0, 20, (ticks) -> {
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, "rotation_tracks", 0, 20, (ticks) -> {
             tracks.values().forEach(RotationTrack::tick);
             return false;
         });

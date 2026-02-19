@@ -138,7 +138,7 @@ public class BroadcastTask implements Runnable {
 
         AtomicLong timeLeft = new AtomicLong(totalSeconds);
 
-        taskService.subscribe(AdventureBGS.SYSTEM_ID, 0, 20, (ticks) -> {
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, "boss_bar", 0, 20, false, (ticks) -> {
             if (timeLeft.get() <= 0 || rotation.isNewCycle()) {
                 // Apply penalty to OLD map
                 stopWarningCountdown(rotation);

@@ -67,7 +67,7 @@ public class WeatherManager {
         effect.start(world);
         Bukkit.getLogger().info("[Adventure] Starting weather " + model.getType() + " for " + (durationTicks / 20) + " seconds in world " + world.getName() + ".");
 
-        taskService.subscribe(AdventureBGS.SYSTEM_ID, model.getType(), 0, 20, (ticks) -> {
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, model.getType(), 0, 20, false, (ticks) -> {
             effect.tick(world);
             return false;
         });

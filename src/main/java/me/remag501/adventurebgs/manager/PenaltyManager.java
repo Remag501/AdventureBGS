@@ -91,7 +91,7 @@ public class PenaltyManager {
     }
 
     public void startBroadcastTask() {
-        taskService.subscribe(AdventureBGS.SYSTEM_ID, 20, 20, (ticks) -> {
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, "broadcast_task", 20, 20, false, (ticks) -> {
             broadcastTask.run();
             return false;
         });
