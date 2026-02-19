@@ -7,30 +7,28 @@ import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
 import me.remag501.adventurebgs.util.MessageUtil;
+import me.remag501.bgscore.api.task.TaskService;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Consumer;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 public class BroadcastTask implements Runnable {
 
-    private final AdventureBGS plugin;
+    private final TaskService taskService;
     private final RotationManager rotationManager;
 
     private AdventureSettings settings;
-//    private BukkitRunnable warningTask;
-//    private boolean hasBroadcasted = false;
-//    private BossBar warningBossBar;
     private Consumer<String> onTimeUp;
 
-    public BroadcastTask(AdventureBGS plugin, RotationManager rotationManager, AdventureSettings settings) {
-        this.plugin = plugin;
+    public BroadcastTask(TaskService taskService, RotationManager rotationManager, AdventureSettings settings) {
+        this.taskService = taskService;
         this.rotationManager = rotationManager;
         this.settings = settings;
     }
@@ -138,64 +136,45 @@ public class BroadcastTask implements Runnable {
         // Add existing players
         world.getPlayers().forEach(warningBossBar::addPlayer);
 
-        BukkitRunnable warningTask = new BukkitRunnable() {
-            long timeLeft = totalSeconds;
+        AtomicLong timeLeft = new AtomicLong(totalSeconds);
 
-            @Override
-            public void run() {
-
-                if (timeLeft <= 0 || rotation.isNewCycle()) {
-                    // Apply penalty to OLD map
-//                    Bukkit.getLogger().info("Reached logic to stop via timer" + rotation.getId()); // why this not proc tho
-                    stopWarningCountdown(rotation);
-                    return;
-                }
-
-                if (timeLeft > 180 )
-                    warningBossBar.hide();
-                else if (timeLeft >= 120) {
-                    warningBossBar.show();
-                    warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l2 §cminutes...");
-                    warningBossBar.setProgress(1);
-//                    warningBossBar.setProgress(Math.max(0.0, (double) timeLeft / totalSeconds));
-                } else if (timeLeft >= 60) {
-                    warningBossBar.show();
-                    warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l1 §cminute...");
-                    warningBossBar.setProgress(1);
-//                    warningBossBar.setProgress(Math.max(0.0, (double) timeLeft / totalSeconds));
-                } else {
-                    warningBossBar.show();
-                    warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l" + timeLeft + " §cseconds...");
-                    warningBossBar.setProgress(1);
-//                    warningBossBar.setProgress(Math.max(0.0, (double) timeLeft / totalSeconds));
-                }
-
-                timeLeft--;
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, 0, 20, (ticks) -> {
+            if (timeLeft.get() <= 0 || rotation.isNewCycle()) {
+                // Apply penalty to OLD map
+                stopWarningCountdown(rotation);
+                return true;
             }
-        };
 
-        rotation.setWarningTask(warningTask);
+            if (timeLeft.get() > 180 )
+                warningBossBar.hide();
+            else if (timeLeft.get() >= 120) {
+                warningBossBar.show();
+                warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l2 §cminutes...");
+                warningBossBar.setProgress(1);
+            } else if (timeLeft.get() >= 60) {
+                warningBossBar.show();
+                warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l1 §cminute...");
+                warningBossBar.setProgress(1);
+            } else {
+                warningBossBar.show();
+                warningBossBar.setTitle("§c§lWARNING: §cExtraction closes in §c§l" + timeLeft + " §cseconds...");
+                warningBossBar.setProgress(1);
+            }
 
-        warningTask.runTaskTimer(plugin, 0L, 20L);
+            timeLeft.getAndDecrement();
+            return false;
+        });
 
         // Apply penalty after warning ticks
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (onTimeUp != null) {
-                    onTimeUp.accept(world.getName());
-                }
+        taskService.delay((int) (totalSeconds * 20), () -> {
+            if (onTimeUp != null) {
+                onTimeUp.accept(world.getName());
             }
-        }.runTaskLater(plugin, totalSeconds * 20L);
+        });
 
     }
 
     private synchronized void stopWarningCountdown(RotationTrack rotation) {
-        BukkitRunnable warningTask = rotation.getWarningTask();
-        if (warningTask != null) {
-            warningTask.cancel();
-            warningTask = null;
-        }
 
         BossBar warningBossBar = rotation.getWarningBossBar();
         Bukkit.getLogger().info("Emptying out boss bar for rotation track " + rotation.getId());

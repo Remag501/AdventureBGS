@@ -54,14 +54,14 @@ public class AdventureBGS extends JavaPlugin {
         // Independent Managers (Leaves)
         this.extractionManager = new ExtractionManager(settings);
         this.pdcManager = new PDCManager(this);
-        this.rotationManager = new RotationManager(this, settings);
+        this.rotationManager = new RotationManager(taskService, settings);
 
         // Managers that need Rotation (Workers)
-        this.broadcastTask = new BroadcastTask(this, rotationManager, settings);
-        this.weatherManager = new WeatherManager(this, settings);
+        this.broadcastTask = new BroadcastTask(taskService, rotationManager, settings);
+        this.weatherManager = new WeatherManager(taskService, settings);
 
         // Complex Managers (Controllers)
-        this.penaltyManager = new PenaltyManager(this, pdcManager, rotationManager, broadcastTask, settings);
+        this.penaltyManager = new PenaltyManager(taskService, pdcManager, broadcastTask, settings);
         this.guiManager = new GuiManager(this, rotationManager, settings);
 
         // Register commands
@@ -69,7 +69,7 @@ public class AdventureBGS extends JavaPlugin {
 
         // Register Listener
 //        getServer().getPluginManager().registerEvents(, this);
-        new ExtractionListener(eventService, this, extractionManager, rotationManager, provider);
+        new ExtractionListener(eventService, taskService, extractionManager, rotationManager, provider);
 //        getServer().getPluginManager().registerEvents(, this);
         new JoinListener(eventService, pdcManager, rotationManager, penaltyManager);
 //        getServer().getPluginManager().registerEvents(, this);

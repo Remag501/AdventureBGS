@@ -5,6 +5,7 @@ import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.WeatherModel;
 import me.remag501.adventurebgs.weather.BlizzardWeather;
 import me.remag501.adventurebgs.weather.WeatherEffect;
+import me.remag501.bgscore.api.task.TaskService;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -19,12 +20,12 @@ public class WeatherManager {
             "blizzard", new BlizzardWeather()
     );
 
-    private final AdventureBGS plugin;
+    private final TaskService taskService;
 
     private List<WeatherModel> weathers;
 
-    public WeatherManager(AdventureBGS plugin, AdventureSettings settings) {
-        this.plugin = plugin;
+    public WeatherManager(TaskService taskService, AdventureSettings settings) {
+        this.taskService = taskService;
         weathers = settings.getWeatherModels();
         startScheduling();
     }
@@ -43,10 +44,11 @@ public class WeatherManager {
     private void scheduleNext(WeatherModel model) {
         int delayTicks = model.randomFrequencyMinutes() * 60 * 20; // Won't wait for previous weather to finish up
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        taskService.delay(delayTicks, () -> {
             startWeather(model);
             scheduleNext(model); // chain forever
-        }, delayTicks);
+        });
+
     }
 
     private void startWeather(WeatherModel model) {
@@ -59,20 +61,16 @@ public class WeatherManager {
         int durationTicks = model.randomDurationSeconds() * 20;
 
         effect.start(world);
-        plugin.getLogger().info("Starting weather " + model.getType() + " for " + (durationTicks / 20) + " seconds in world " + world.getName() + ".");
+        Bukkit.getLogger().info("[Adventure] Starting weather " + model.getType() + " for " + (durationTicks / 20) + " seconds in world " + world.getName() + ".");
 
-        BukkitRunnable tickTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                effect.tick(world);
-            }
-        };
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, model.getType(), 0, 20, (ticks) -> {
+            effect.tick(world);
+            return false;
+        });
 
-        tickTask.runTaskTimer(plugin, 0L, 20L);
+        taskService.delay(durationTicks, () -> {
+            taskService.stopTask(AdventureBGS.SYSTEM_ID, model.getType());
+        });
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            tickTask.cancel();
-            effect.stop(world);
-        }, durationTicks);
     }
 }

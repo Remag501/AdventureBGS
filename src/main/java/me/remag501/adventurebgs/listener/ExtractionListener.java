@@ -22,14 +22,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ExtractionListener {
 
-//    private final AdventureBGS plugin;
     private final TaskService taskService;
     private final ExtractionManager extractionManager;
     private final RotationManager rotationManager;
     private final SettingsProvider provider;
 
-    public ExtractionListener(EventService eventService, TaskService taskService, AdventureBGS plugin, ExtractionManager extractionManager, RotationManager rotationManager, SettingsProvider provider) {
-//        this.plugin = plugin;
+    public ExtractionListener(EventService eventService, TaskService taskService, ExtractionManager extractionManager, RotationManager rotationManager, SettingsProvider provider) {
         this.taskService = taskService;
         this.extractionManager = extractionManager;
         this.rotationManager = rotationManager;

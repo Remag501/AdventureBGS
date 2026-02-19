@@ -4,6 +4,7 @@ import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.task.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;
+import me.remag501.bgscore.api.task.TaskService;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -11,20 +12,18 @@ import org.bukkit.potion.PotionEffectType;
 
 public class PenaltyManager {
 
-    private final AdventureBGS plugin;
+    private final TaskService taskService;
     private final BroadcastTask broadcastTask;
-    private final RotationManager rotationManager;
     private final PDCManager pdcManager;
 
     private AdventureSettings settings;
 
 
-    public PenaltyManager(AdventureBGS plugin, PDCManager pdcManager, RotationManager rotationManager, BroadcastTask broadcastTask, AdventureSettings settings) {
-        this.plugin = plugin;
+    public PenaltyManager(TaskService taskService, PDCManager pdcManager, BroadcastTask broadcastTask, AdventureSettings settings) {
+        this.taskService = taskService;
         this.pdcManager = pdcManager;
         this.broadcastTask = broadcastTask;
         this.settings = settings;
-        this.rotationManager = rotationManager;
 
         // Lambda function to apply penalty based on broadcast task
         broadcastTask.setOnTimeUp(this::applyPenalty);
@@ -38,7 +37,7 @@ public class PenaltyManager {
         String penaltyMsg = settings.getPenaltyMessage();
         String soundName = settings.getPenaltySound();
 
-        plugin.getLogger().info("Withering the world: " + closedWorldName);
+        Bukkit.getLogger().info("Withering the world: " + closedWorldName);
 
         // Wither away online players
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -49,10 +48,19 @@ public class PenaltyManager {
 
             // Play sound
             try {
-                Sound sound = Sound.valueOf(soundName);
+                String formattedSound = soundName.toLowerCase().replace("_", ".");
+                NamespacedKey soundKey = NamespacedKey.minecraft(formattedSound);
+                // Look it up in the SOUNDS registry
+                Sound sound = Registry.SOUNDS.get(soundKey);
+                // Fallback logic if the sound is invalid/missing
+                if (sound == null) {
+                    Bukkit.getLogger().warning("[Adventure] Invalid sound in config: " + soundName + ". Defaulting to WITHER_SPAWN.");
+                    sound = Sound.ENTITY_WITHER_SPAWN;
+                }
+                // Play the sound
                 player.playSound(player.getLocation(), sound, 1f, 1f);
             } catch (IllegalArgumentException ignored) {
-                plugin.getLogger().warning("Invalid sound in config: " + soundName);
+                Bukkit.getLogger().warning("Invalid sound in config: " + soundName);
             }
 
             penalizePlayer(player);
@@ -60,7 +68,6 @@ public class PenaltyManager {
         }
 
         // Kill any players who logged out
-//        updateWorldVersion(Bukkit.getWorld(closedWorldName));
         pdcManager.incrementWorldVersion(Bukkit.getWorld(closedWorldName));
 
     }
@@ -86,15 +93,10 @@ public class PenaltyManager {
         ));
     }
 
-//    public void updateWorldVersion(World world) {
-//        NamespacedKey key = new NamespacedKey(plugin, "map_version");
-//        int currentVersion = world.getPersistentDataContainer().getOrDefault(key, PersistentDataType.INTEGER, 0);
-//
-//        // Increment the version so old player "tickets" become invalid
-//        world.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, currentVersion + 1);
-//    }
-
     public void startBroadcastTask() {
-        Bukkit.getScheduler().runTaskTimer(plugin, broadcastTask, 20L, 20L);
+        taskService.subscribe(AdventureBGS.SYSTEM_ID, 20, 20, (ticks) -> {
+            broadcastTask.run();
+            return false;
+        });
     }
 }
