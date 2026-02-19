@@ -22,7 +22,6 @@ public final class RotationTrack {
     private boolean hasBroadcasted = false;
 
     private BossBar warningBossBar;
-    private BukkitRunnable warningTask;
 
 
     public RotationTrack(String id,
@@ -115,13 +114,6 @@ public final class RotationTrack {
         this.warningBossBar = warningBossBar;
     }
 
-    public BukkitRunnable getWarningTask() {
-        return warningTask;
-    }
-
-    public void setWarningTask(BukkitRunnable warningTask) {
-        this.warningTask = warningTask;
-    }
 
 }
 
