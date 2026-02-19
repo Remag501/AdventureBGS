@@ -1,5 +1,6 @@
 package me.remag501.adventurebgs.model;
 
+import me.remag501.bgscore.api.task.TaskService;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -30,7 +31,7 @@ public class ExtractionZone {
 
     // --- ZONE STATE FIELDS ---
     private BossBar extractionBossBar;
-    private BukkitRunnable extractionTask;
+    private UUID extractionTaskId; // REPLACED: BukkitRunnable -> UUID handle
     // Players currently in the zone during countdown
     private final Set<UUID> extractingPlayers = new HashSet<>();
 
@@ -79,7 +80,7 @@ public class ExtractionZone {
 
     /** Checks if the extraction timer is currently running. */
     public boolean isExtracting() {
-        return extractionTask != null;
+        return extractionTaskId != null;
     }
 
     /** Checks if the zone is currently in the disabled cooldown phase. */
@@ -115,9 +116,9 @@ public class ExtractionZone {
         return extractingPlayers;
     }
 
-    /** Sets the BukkitRunnable task for cancellation purposes. */
-    public void setExtractionTask(BukkitRunnable task) {
-        this.extractionTask = task;
+    /** Sets the Task ID handle. */
+    public void setExtractionTaskId(UUID taskId) {
+        this.extractionTaskId = taskId;
     }
 
     // --- METHODS FOR STATE MANAGEMENT ---
@@ -140,16 +141,17 @@ public class ExtractionZone {
         // BossBar removal is not needed here as the bar is global to the world.
     }
 
-    /** Cleans up and resets the active extraction state (task and boss bar). */
-    public void cancelExtraction() {
-        if (extractionTask != null) {
-            extractionTask.cancel();
+    /** Cleans up and resets the active extraction state. */
+    public void cancelExtraction(TaskService taskService) {
+        if (extractionTaskId != null) {
+            // Use your Core API to kill the task
+            taskService.stopTask(extractionTaskId, "extraction");
+            extractionTaskId = null;
         }
         if (extractionBossBar != null) {
             extractionBossBar.removeAll();
+            extractionBossBar = null;
         }
-        extractionTask = null;
-        extractionBossBar = null;
         extractingPlayers.clear();
     }
 
