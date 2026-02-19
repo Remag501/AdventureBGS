@@ -1,46 +1,45 @@
 package me.remag501.adventurebgs.listener;
 
+import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.manager.PDCManager;
 import me.remag501.adventurebgs.manager.PenaltyManager;
 import me.remag501.adventurebgs.manager.RotationManager;
+import me.remag501.bgscore.api.event.EventService;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-public class JoinListener implements Listener {
+public class JoinListener {
 
     private final PDCManager pdcManager;
     private final PenaltyManager penaltyManager;
-    private final RotationManager rotationManager;
 
-    public JoinListener(PDCManager pdcManager, RotationManager rotationManager, PenaltyManager penaltyManager) {
+    public JoinListener(EventService eventService, PDCManager pdcManager, RotationManager rotationManager, PenaltyManager penaltyManager) {
         this.pdcManager = pdcManager;
-        this.rotationManager = rotationManager;
         this.penaltyManager = penaltyManager;
+
+        eventService.subscribe(PlayerJoinEvent.class)
+                // Filter: Only process players joining a world that is part of a rotation track
+                .filter(event -> rotationManager.getTrackByWorld(event.getPlayer().getWorld()) != null)
+                .handler(this::handlePenaltyCheck);
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    private void handlePenaltyCheck(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         World world = player.getWorld();
 
-        // Check if this is even an adventure world
-        if (rotationManager.getTrackByWorld(world) == null) return;
-
-        // Use the manager to check the versions
+        // Check if player version lags behind world version
         if (pdcManager.isPlayerOutdated(player, world)) {
-
             int pVer = pdcManager.getPlayerVersionForWorld(player, world);
             int wVer = pdcManager.getWorldVersion(world);
+
             Bukkit.getLogger().info("[Adventure] Penalizing " + player.getName() + ": Player Ver " + pVer + " < World Ver " + wVer);
 
             player.sendMessage("§c§l(!) §cYou left the game before extracting!");
             penaltyManager.penalizePlayer(player);
 
-            // Sync them so they are safe until the next reset
+            // Sync them so they are safe until the next reset/rotation
             pdcManager.syncPlayerToWorld(player, world);
         }
     }

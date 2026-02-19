@@ -1,54 +1,44 @@
 package me.remag501.adventurebgs.listener;
 
+import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.task.BroadcastTask;
+import me.remag501.bgscore.api.event.EventService;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 
-public class BroadcastListener implements Listener {
+public class BroadcastListener {
 
-    private final BroadcastTask task;
     private final RotationManager rotationManager;
 
-    public BroadcastListener(RotationManager rotationManager, BroadcastTask task) {
+    public BroadcastListener(EventService eventService, RotationManager rotationManager) {
         this.rotationManager = rotationManager;
-        this.task = task;
+
+        // Self-register using the new EventService API
+        eventService.subscribe(PlayerChangedWorldEvent.class)
+                .handler(this::handleWorldChange);
     }
 
-    @EventHandler
-    public void onWorldChange(PlayerChangedWorldEvent event) {
+    private void handleWorldChange(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        String currentWorldName = player.getWorld().getName();
 
-//        Player player = event.getPlayer();
-//        RotationTrack track = rotationManager.getTrackByWorld(player.getWorld());
-//        if (track == null) return;
-//        BossBar bar = track.getWarningBossBar();
-//        if (bar == null) return;
-//
-//        String activeWorld = rotationManager.getTrackByWorld(player.getWorld()).getCurrentWorld().getId();
-//
-//        if (event.getPlayer().getWorld().getName().equals(activeWorld)) {
-//            bar.addPlayer(event.getPlayer());
-//        } else {
-//            bar.removePlayer(event.getPlayer());
-//        }
-
-        for (RotationTrack track: rotationManager.getTracks()) {
-
-            String activeWorld = track.getCurrentWorld().getId();
+        for (RotationTrack track : rotationManager.getTracks()) {
             BossBar bar = track.getWarningBossBar();
             if (bar == null) continue;
 
-            if (event.getPlayer().getWorld().getName().equals(activeWorld)) {
-                bar.addPlayer(event.getPlayer());
+            String activeWorldId = track.getCurrentWorld().getId();
+
+            if (currentWorldName.equals(activeWorldId)) {
+                bar.addPlayer(player);
+            } else {
+                bar.removePlayer(player);
             }
-            else
-                bar.removePlayer(event.getPlayer());
         }
-
     }
-
-
 }

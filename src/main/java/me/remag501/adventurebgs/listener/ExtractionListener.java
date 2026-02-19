@@ -1,217 +1,125 @@
 package me.remag501.adventurebgs.listener;
 
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import me.remag501.adventurebgs.AdventureBGS;
-import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.manager.ExtractionManager;
 import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.ExtractionZone;
 import me.remag501.adventurebgs.model.RotationTrack;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.util.MessageUtil;
+import me.remag501.bgscore.api.event.EventService;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-public class ExtractionListener implements Listener {
+public class ExtractionListener {
 
     private final AdventureBGS plugin;
     private final ExtractionManager extractionManager;
     private final RotationManager rotationManager;
     private final SettingsProvider provider;
 
-    public ExtractionListener(AdventureBGS plugin, ExtractionManager extractionManager, RotationManager rotationManager, SettingsProvider provider) {
+    public ExtractionListener(EventService eventService, AdventureBGS plugin, ExtractionManager extractionManager, RotationManager rotationManager, SettingsProvider provider) {
         this.plugin = plugin;
         this.extractionManager = extractionManager;
         this.rotationManager = rotationManager;
         this.provider = provider;
+
+        // Register via EventService
+        eventService.subscribe(PlayerMoveEvent.class)
+                .filter(this::shouldProcessMove)
+                .handler(this::handleMove);
     }
 
     /**
-     * Changes the color of the two glass blocks above the beacon for a visual indicator.
+     * High-performance filter to discard irrelevant movements before logic processing.
      */
-    private void updateBeaconColor(ExtractionZone zone, Material glassType1, Material glassType2) {
-        Location beaconLoc = zone.getBeaconLoc();
-        if (beaconLoc == null) return;
-
-        World world = beaconLoc.getWorld();
-        if (world == null) return;
-
-        int chunkX = beaconLoc.getBlockX() >> 4;
-        int chunkZ = beaconLoc.getBlockZ() >> 4;
-
-        world.getChunkAtAsync(chunkX, chunkZ, /* generate */ false, chunk -> {
-            // Runs once the chunk is loaded — **without blocking the main thread**
-            // Now you can safely update blocks inside a Bukkit task
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                Block glass1 = beaconLoc.clone().add(0, 1, 0).getBlock();
-                Block glass2 = beaconLoc.clone().add(0, 2, 0).getBlock();
-                glass1.setType(glassType1, false);
-                glass2.setType(glassType2, false);
-            });
-        });
-    }
-
-
-    /**
-     * Sends a message to all online players currently within the bounds of the given ExtractionZone.
-     */
-    private void messagePlayersInZone(ExtractionZone zone, String message) {
-        World world = Bukkit.getWorld(zone.getWorld());
-        if (world == null) return;
-        String colorMessage = MessageUtil.color(message);
-
-        for (Player p : world.getPlayers()) {
-            // Only send message if the player is actually standing in the zone
-            if (zone.contains(p.getLocation())) {
-                p.sendMessage(colorMessage);
-            }
-        }
-    }
-
-    /**
-     * Helper to find the correct active BossBar (Extraction, Portal, or Cooldown)
-     * for a zone and add the player to it, ensuring synchronization.
-     */
-    private void syncPlayerBossBar(Player player, ExtractionZone zone) {
-        BossBar activeBar = null;
-
-        // 1. Check Extraction Timer
-        if (zone.isExtracting() && zone.getExtractionBossBar() != null) {
-            activeBar = zone.getExtractionBossBar();
-        }
-        // 2. Check Portal Open Phase
-        else if (zone.isPortalOpen() && zone.getPortalBossBar() != null) {
-            activeBar = zone.getPortalBossBar();
-        }
-        // 3. Check Cooldown Phase
-        else if (zone.isDown() && zone.getCooldownBossBar() != null) {
-            activeBar = zone.getCooldownBossBar();
-        }
-
-        if (activeBar != null && !activeBar.getPlayers().contains(player)) {
-            activeBar.addPlayer(player);
-        }
-    }
-
-    // Removed onPlayerJoin handler as players do not spawn/relog into an extraction zone.
-
-    @EventHandler
-    public void onMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-
-        // 1. Ignore micro movements
+    private boolean shouldProcessMove(PlayerMoveEvent event) {
+        // 1. Ignore micro movements (same block)
         if (event.getFrom().getBlockX() == event.getTo().getBlockX()
                 && event.getFrom().getBlockY() == event.getTo().getBlockY()
                 && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
-            return;
+            return false;
         }
 
-        // 2. Ignore players not in extraction world
+        // 2. Ignore players not in an active rotation world
+        Player player = event.getPlayer();
         RotationTrack track = rotationManager.getTrackByWorld(player.getWorld());
-        if (track == null)
-            return;
-        if (!player.getWorld().getName().equals(track.getCurrentWorld().getId()))
-            return;
+        if (track == null) return false;
 
-        // 3. Find the zone the player is moving into and the zone they are moving from
+        return player.getWorld().getName().equals(track.getCurrentWorld().getId());
+    }
+
+    private void handleMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+
+        // Find the zones
         ExtractionZone fromZone = extractionManager.getZone(event.getFrom());
         ExtractionZone toZone = extractionManager.getZone(event.getTo());
 
         // --- PART A: Handle Player Status (Adding/Removing from Bars) ---
 
-        // A1. Player is leaving a zone (Handle Extraction, Portal, & Cooldown Bars)
+        // A1. Player is leaving a zone
         if (fromZone != null && fromZone != toZone) {
-            // If the zone was extracting, remove the player and check for cancellation
             if (fromZone.isExtracting()) {
-                // Remove player from the extraction BossBar when they leave the zone
                 if (fromZone.getExtractionBossBar() != null) {
                     fromZone.getExtractionBossBar().removePlayer(player);
                 }
 
                 fromZone.removeExtractingPlayer(player);
 
-                // If the zone is now empty, cancel the entire extraction (Zone-centric cancellation)
                 if (fromZone.isEmpty()) {
                     fromZone.cancelExtraction();
-
-                    // Cancellation message: RESERVED for players inside the zone
                     String cancelMessage = MessageUtil.color(provider.getSettings().getExtractionCancel());
-
-                    // Only message players who are in the now-cancelled zone
                     messagePlayersInZone(fromZone, cancelMessage);
                 }
             }
-            // If the portal is open, remove them from the Portal BossBar
             else if (fromZone.isPortalOpen() && fromZone.getPortalBossBar() != null) {
                 fromZone.getPortalBossBar().removePlayer(player);
             }
-            // If the zone was down, remove them from the Cooldown BossBar (they left the down area)
+
             if (fromZone.isDown() && fromZone.getCooldownBossBar() != null) {
                 fromZone.getCooldownBossBar().removePlayer(player);
             }
         }
 
-        // A2. Player is entering a zone (Handle Extraction, Portal, & Cooldown Bars)
+        // A2. Player is entering a zone
         if (toZone != null && fromZone != toZone) {
-            // If the zone is currently running an extraction timer, add them to the list of extractors
             if (toZone.isExtracting()) {
                 toZone.addExtractingPlayer(player);
             }
-
-            // CONSOLIDATED FIX: Add the player to the correct active BossBar.
             syncPlayerBossBar(player, toZone);
         }
 
-
         // --- PART B: Handle Extraction Start Logic ---
-
-        // 4. Check if the player is in an eligible zone to START a new extraction
         if (toZone != null && toZone.isEnabled() && !toZone.isExtracting()) {
             startExtraction(player, toZone);
         }
     }
 
     private void startExtraction(Player player, ExtractionZone zone) {
-        // Broadcast start message: RESERVED for players inside the zone
         String rawStartMsg = provider.getSettings().getExtractionStart();
         String zoneNamePlaceholder = "Extraction Zone";
         String startMsg = MessageUtil.color(rawStartMsg
                 .replace("%seconds%", String.valueOf(provider.getSettings().getExtractionDuration()))
                 .replace("%zone%", zoneNamePlaceholder));
 
-        // Message restricted to players currently in the zone
         messagePlayersInZone(zone, startMsg);
 
         String title = MessageUtil.color(provider.getSettings().getExtractionBossTitle());
+        BossBar bossBar = Bukkit.createBossBar(title, BarColor.GREEN, BarStyle.SOLID);
 
-        BossBar bossBar = Bukkit.createBossBar(
-                title,
-                BarColor.GREEN,
-                BarStyle.SOLID
-        );
-
-        // FIX: Explicitly add the player who triggered the extraction to the BossBar immediately.
         bossBar.addPlayer(player);
 
-        // Add ONLY players currently inside the zone to the BossBar (Local visibility)
         World world = player.getWorld();
         for (Player p : world.getPlayers()) {
             if (zone.contains(p.getLocation())) {
-                // The addPlayer method is idempotent, so calling it again for the trigger player is safe.
                 bossBar.addPlayer(p);
             }
         }
@@ -241,7 +149,6 @@ public class ExtractionListener implements Listener {
 
                 int alertSeconds = provider.getSettings().getAlertSeconds();
                 if (timeLeft == alertSeconds && !alertTriggered) {
-                    // IMPLEMENTED: Global Alert System call
                     triggerAlert(zone);
                     alertTriggered = true;
                 }
@@ -257,20 +164,15 @@ public class ExtractionListener implements Listener {
         task.runTaskTimer(plugin, 0L, 20L);
     }
 
-    // Refactored to operate on the ZONE
     private void completeExtraction(ExtractionZone zone) {
         World world = Bukkit.getWorld(zone.getWorld());
         if (world == null) return;
 
-        // 1. Snapshot the players who successfully completed the extraction
         Set<UUID> successfulPlayers = new HashSet<>(zone.getExtractingPlayers());
-
-        // 2. Clean up the extraction state (This also clears the extractingPlayers list and removes the BossBar from all viewers)
         zone.cancelExtraction();
 
         String successMsg = MessageUtil.color(provider.getSettings().getExtractionSuccess());
 
-        // SUCCESS MESSAGE: ONLY to the players who successfully extracted
         for (UUID uuid : successfulPlayers) {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null && p.isOnline()) {
@@ -278,7 +180,6 @@ public class ExtractionListener implements Listener {
             }
         }
 
-        // --- Phase 1: Open the portal (replace gate with air) ---
         List<Location> gateBlocks = zone.getPortalGateBlocks();
         Map<Location, Material> originalBlocks = new HashMap<>();
         for (Location loc : gateBlocks) {
@@ -286,30 +187,23 @@ public class ExtractionListener implements Listener {
             loc.getBlock().setType(Material.AIR);
         }
 
-        zone.setEnabled(false); // Zone is now disabled for the cooldown
+        zone.setEnabled(false);
         zone.setPortalOpen(true);
-
-        // BEACON UPDATE: Portal is open -> Yellow
         updateBeaconColor(zone, Material.AIR, Material.AIR);
 
-        // --- Portal open phase ---
         int portalOpenSeconds = provider.getSettings().getPortalOpenSeconds();
         String portalOpenMessage = provider.getSettings().getExtractionPortalOpen()
                 .replace("%seconds%", String.valueOf(portalOpenSeconds));
 
-        // PORTAL OPEN MESSAGE: RESERVED for players *currently* inside the zone (excludes successful extractors)
         messagePlayersInZone(zone, portalOpenMessage);
 
         BossBar portalBar = Bukkit.createBossBar(
                 "§aPortal is open for §a§l" + portalOpenSeconds + " §aseconds...",
-                BarColor.GREEN,
-                BarStyle.SOLID
+                BarColor.GREEN, BarStyle.SOLID
         );
 
-        // Store the portal bar in the zone model
         zone.setPortalBossBar(portalBar);
 
-        // BossBar is local for players currently inside the zone
         for (Player p : world.getPlayers()) {
             if (zone.contains(p.getLocation())) {
                 portalBar.addPlayer(p);
@@ -318,37 +212,27 @@ public class ExtractionListener implements Listener {
 
         BukkitRunnable portalTask = new BukkitRunnable() {
             int timeLeft = portalOpenSeconds;
-
             @Override
             public void run() {
                 if (timeLeft <= 0) {
                     portalBar.removeAll();
                     cancel();
-                    zone.setPortalOpen(false); // This setter now cleans up the portalBossBar in the model
+                    zone.setPortalOpen(false);
 
-                    // --- Phase 2: Close portal (restore blocks) ---
                     for (Map.Entry<Location, Material> entry : originalBlocks.entrySet()) {
                         entry.getKey().getBlock().setType(entry.getValue());
                     }
 
-                    // --- Phase 3: Extraction down (cooldown) ---
                     int zoneDownSeconds = provider.getSettings().getDownSeconds();
-                    String zoneDownMsg = provider.getSettings().getExtractionDown()
-                            .replace("%seconds%", String.valueOf(zoneDownSeconds));
+                    messagePlayersInZone(zone, provider.getSettings().getExtractionDown().replace("%seconds%", String.valueOf(zoneDownSeconds)));
 
-                    // ZONE DOWN MESSAGE: RESERVED for players inside the zone
-                    messagePlayersInZone(zone, zoneDownMsg);
-
-                    // BEACON UPDATE: Zone is down -> Red
                     updateBeaconColor(zone, Material.RED_STAINED_GLASS, Material.RED_STAINED_GLASS);
 
                     BossBar downBar = Bukkit.createBossBar(
                             "§cExtraction is down for §c§l" + zoneDownSeconds + " §cseconds...",
-                            BarColor.RED,
-                            BarStyle.SOLID
+                            BarColor.RED, BarStyle.SOLID
                     );
 
-                    // BossBar is local for players currently inside the zone
                     for (Player p : world.getPlayers()) {
                         if (zone.contains(p.getLocation())) {
                             downBar.addPlayer(p);
@@ -358,20 +242,13 @@ public class ExtractionListener implements Listener {
 
                     new BukkitRunnable() {
                         int downTimeLeft = zoneDownSeconds;
-
                         @Override
                         public void run() {
                             if (downTimeLeft <= 0) {
-                                downBar.removeAll(); // Ensure the cooldown bar is removed
+                                downBar.removeAll();
                                 zone.endCooldown();
-
-                                // BEACON UPDATE: Zone is ready -> Green
                                 updateBeaconColor(zone, Material.LIME_STAINED_GLASS, Material.LIME_STAINED_GLASS);
-
-                                String reEnabledMsg = "&aExtraction zone is now open again!";
-                                // RE-ENABLED MESSAGE: RESERVED for players inside the zone
-                                messagePlayersInZone(zone, reEnabledMsg);
-
+                                messagePlayersInZone(zone, "&aExtraction zone is now open again!");
                                 cancel();
                                 return;
                             }
@@ -387,52 +264,62 @@ public class ExtractionListener implements Listener {
                 }
             }
         };
-
         portalTask.runTaskTimer(plugin, 0L, 20L);
     }
 
+    private void updateBeaconColor(ExtractionZone zone, Material glassType1, Material glassType2) {
+        Location beaconLoc = zone.getBeaconLoc();
+        if (beaconLoc == null) return;
+        World world = beaconLoc.getWorld();
+        if (world == null) return;
 
-    /**
-     * Triggers a global alert (sound, particles) to warn all players in the world
-     * that an extraction is about to be completed.
-     */
+        world.getChunkAtAsync(beaconLoc.getBlockX() >> 4, beaconLoc.getBlockZ() >> 4, false, chunk -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                beaconLoc.clone().add(0, 1, 0).getBlock().setType(glassType1, false);
+                beaconLoc.clone().add(0, 2, 0).getBlock().setType(glassType2, false);
+            });
+        });
+    }
+
+    private void messagePlayersInZone(ExtractionZone zone, String message) {
+        World world = Bukkit.getWorld(zone.getWorld());
+        if (world == null) return;
+        String colorMessage = MessageUtil.color(message);
+        for (Player p : world.getPlayers()) {
+            if (zone.contains(p.getLocation())) p.sendMessage(colorMessage);
+        }
+    }
+
+    private void syncPlayerBossBar(Player player, ExtractionZone zone) {
+        BossBar activeBar = null;
+        if (zone.isExtracting()) activeBar = zone.getExtractionBossBar();
+        else if (zone.isPortalOpen()) activeBar = zone.getPortalBossBar();
+        else if (zone.isDown()) activeBar = zone.getCooldownBossBar();
+
+        if (activeBar != null && !activeBar.getPlayers().contains(player)) {
+            activeBar.addPlayer(player);
+        }
+    }
+
     private void triggerAlert(ExtractionZone zone) {
-        // 1. Fetch config values for the alert
         String rawSound = provider.getSettings().getAlertSound();
-
         World world = Bukkit.getWorld(zone.getWorld());
         if (world == null) return;
 
-        // 2. Play sound to ALL players in the extraction world
-
-        // Note: Minecraft keys use dots or underscores, but Registry is flexible.
         NamespacedKey soundKey = NamespacedKey.minecraft(rawSound.toLowerCase().replace("entity_ender_dragon_growl", "entity.ender_dragon.ambient"));
-        // Look it up in the SOUNDS registry
         Sound alertSound = Registry.SOUNDS.get(soundKey);
-        // Null check (Registry.get returns null if not found)
-        if (alertSound == null) {
-            alertSound = Sound.ENTITY_ENDER_DRAGON_GROWL;
-        }
+        if (alertSound == null) alertSound = Sound.ENTITY_ENDER_DRAGON_GROWL;
 
         for (Player p : world.getPlayers()) {
-            // Play sound localized to the zone's beacon/particle location
             Location soundLoc = zone.getBeaconLoc() != null ? zone.getBeaconLoc() : p.getLocation();
             p.playSound(soundLoc, alertSound, 2.0f, 1.0f);
         }
 
-        // 3. Spawn particles at the specified location (beacon or particle location)
         Location particleLoc = zone.getParticleLoc() != null ? zone.getParticleLoc() : zone.getBeaconLoc();
         if (particleLoc != null) {
-            // Create a burst of particles simulating a flare or fireworks to draw attention
-
-            // Large upward visual flare (FIREWORK_ROCKET instead of FIREWORKS_SPARK)
             world.spawnParticle(Particle.FIREWORK, particleLoc, 100, 0.5, 0.5, 0.5, 0.5);
-
-            // Colored smoke/dust trail (DUST instead of REDSTONE)
             world.spawnParticle(Particle.DUST, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.LIME, 1.5f));
             world.spawnParticle(Particle.DUST, particleLoc, 50, 1.0, 1.0, 1.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1.5f));
-
-            // Instantaneous large explosion (EXPLOSION instead of EXPLOSION_LARGE)
             world.spawnParticle(Particle.EXPLOSION, particleLoc, 1, 0, 0, 0, 0);
         }
     }

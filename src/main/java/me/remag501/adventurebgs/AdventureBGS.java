@@ -19,7 +19,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import org.bukkit.Bukkit;
 
+import java.util.UUID;
+
 public class AdventureBGS extends JavaPlugin {
+
+    public static final UUID SYSTEM_ID = UUID.nameUUIDFromBytes("adventure-system".getBytes());
 
     private RotationManager rotationManager;
     private GuiManager guiManager;
@@ -64,10 +68,14 @@ public class AdventureBGS extends JavaPlugin {
         getCommand("adventure").setExecutor(new AdventureCommand(this, pdcManager, rotationManager, guiManager));
 
         // Register Listener
-        getServer().getPluginManager().registerEvents(new ExtractionListener(this, extractionManager, rotationManager, provider), this);
-        getServer().getPluginManager().registerEvents(new JoinListener(pdcManager, rotationManager, penaltyManager), this);
-        getServer().getPluginManager().registerEvents(new GuiListener(this, pdcManager, rotationManager, provider), this);
-        getServer().getPluginManager().registerEvents(new BroadcastListener(rotationManager, broadcastTask), this);
+//        getServer().getPluginManager().registerEvents(, this);
+        new ExtractionListener(eventService, this, extractionManager, rotationManager, provider);
+//        getServer().getPluginManager().registerEvents(, this);
+        new JoinListener(eventService, pdcManager, rotationManager, penaltyManager);
+//        getServer().getPluginManager().registerEvents(, this);
+        new GuiListener(eventService, this, pdcManager, rotationManager, provider);
+//        getServer().getPluginManager().registerEvents(, this);
+        new BroadcastListener(eventService, rotationManager);
 
         // Start broadcasting messages
         penaltyManager.startBroadcastTask();

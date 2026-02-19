@@ -2,63 +2,67 @@ package me.remag501.adventurebgs.listener;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.manager.PDCManager;
-import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.manager.RotationManager;
 import me.remag501.adventurebgs.model.RotationTrack;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.util.MessageUtil;
+import me.remag501.bgscore.api.event.EventService;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.persistence.PersistentDataType;
 
-public class GuiListener implements Listener {
+public class GuiListener {
 
     private final RotationManager rotationManager;
-    private final SettingsProvider provider;
-    private final AdventureBGS plugin;
     private final PDCManager pdcManager;
+    private final NamespacedKey worldIdKey;
 
-    public GuiListener(AdventureBGS plugin, PDCManager pdcManager, RotationManager rotationManager, SettingsProvider provider) {
-        this.plugin = plugin;
+    public GuiListener(EventService eventService, AdventureBGS plugin, PDCManager pdcManager, RotationManager rotationManager, SettingsProvider provider) {
         this.pdcManager = pdcManager;
         this.rotationManager = rotationManager;
-        this.provider = provider;
+        // Pre-cache the key so we don't recreate it every click
+        this.worldIdKey = new NamespacedKey(plugin, "world_id");
+
+        eventService.subscribe(InventoryClickEvent.class)
+                // Filter: Only handle clicks in our specific GUI
+                .filter(event -> {
+                    String guiTitle = MessageUtil.color(provider.getSettings().getGuiTitle());
+                    return event.getView().getTitle().equals(guiTitle);
+                })
+                .handler(this::handleGuiClick);
     }
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        String guiTitle = MessageUtil.color(provider.getSettings().getGuiTitle());
-        String viewTitle = event.getView().getTitle();
+    private void handleGuiClick(InventoryClickEvent event) {
+        event.setCancelled(true);
 
-        if (!viewTitle.equals(guiTitle)) return;
-
-        event.setCancelled(true); // Prevent taking items
-
-        if (event.getCurrentItem() == null) return;
+        if (!(event.getWhoClicked() instanceof Player player) || event.getCurrentItem() == null) return;
 
         if (event.getCurrentItem().getType() == Material.PLAYER_HEAD) {
+            String actionId = event.getCurrentItem().getItemMeta()
+                    .getPersistentDataContainer()
+                    .get(worldIdKey, PersistentDataType.STRING);
 
-            NamespacedKey guiKey = new NamespacedKey(plugin, "world_id");
-            String actionId = event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(guiKey, PersistentDataType.STRING);
+            if (actionId == null) return;
 
-            for (RotationTrack rotationTrack: rotationManager.getTracks()) {
-
+            for (RotationTrack rotationTrack : rotationManager.getTracks()) {
                 if (actionId.equals(rotationTrack.getId())) {
-                    // Teleport with BetterRTP
                     String currentWorld = rotationTrack.getCurrentWorld().getId();
+
+                    // Teleport and Sync
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + player.getName() + " " + currentWorld);
                     player.closeInventory();
-                    pdcManager.syncPlayerToWorld(player, Bukkit.getWorld(currentWorld));
+
+                    // Ensure the world exists before syncing
+                    org.bukkit.World targetWorld = Bukkit.getWorld(currentWorld);
+                    if (targetWorld != null) {
+                        pdcManager.syncPlayerToWorld(player, targetWorld);
+                    }
                     break;
                 }
             }
         }
     }
-
-
 }
