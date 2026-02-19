@@ -9,6 +9,7 @@ commands:
     usage: /adventure
 
 depend:
+  - BGSCore
   - Multiverse-Core
   - BetterRTP
   - PlaceholderAPI
