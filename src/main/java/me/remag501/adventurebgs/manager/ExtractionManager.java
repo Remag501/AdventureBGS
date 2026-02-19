@@ -2,24 +2,21 @@ package me.remag501.adventurebgs.manager;
 
 import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.ExtractionZone;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import org.bukkit.Location;
 
 import java.util.*;
 
 public class ExtractionManager {
 
-    private AdventureSettings settings;
+    private final SettingsProvider settingsProvider;
 
-    public ExtractionManager(AdventureSettings settings) {
-        this.settings = settings;
-    }
-
-    public void reloadSettings(AdventureSettings settings) {
-        this.settings = settings;
+    public ExtractionManager(SettingsProvider settingsProvider) {
+        this.settingsProvider = settingsProvider;
     }
 
     public ExtractionZone getZone(Location loc) {
-        List<ExtractionZone> zones = settings.getExtractionZones().get(loc.getWorld().getName());
+        List<ExtractionZone> zones = settingsProvider.getSettings().getExtractionZones().get(loc.getWorld().getName());
         if (zones == null) return null;
 
         for (ExtractionZone zone : zones) {
@@ -31,13 +28,13 @@ public class ExtractionManager {
     }
 
     public boolean isInPortal(Location loc) {
-        List<ExtractionZone> zones = settings.getExtractionZones().get(loc.getWorld().getName());
+        List<ExtractionZone> zones = settingsProvider.getSettings().getExtractionZones().get(loc.getWorld().getName());
         if (zones == null) return false;
         return zones.stream().anyMatch(zone -> zone.inPortal(loc));
     }
 
     public List<ExtractionZone> getZones(String world) {
-        return settings.getExtractionZones().getOrDefault(world, Collections.emptyList());
+        return settingsProvider.getSettings().getExtractionZones().getOrDefault(world, Collections.emptyList());
     }
 
     private int[] toIntArray(List<?> list) {

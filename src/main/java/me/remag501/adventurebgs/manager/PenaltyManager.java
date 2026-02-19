@@ -2,6 +2,7 @@ package me.remag501.adventurebgs.manager;
 
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.task.BroadcastTask;
 import me.remag501.adventurebgs.util.MessageUtil;
 import me.remag501.bgscore.api.task.TaskService;
@@ -15,25 +16,21 @@ public class PenaltyManager {
     private final TaskService taskService;
     private final BroadcastTask broadcastTask;
     private final PDCManager pdcManager;
+    private final SettingsProvider settingsProvider;
 
-    private AdventureSettings settings;
 
-
-    public PenaltyManager(TaskService taskService, PDCManager pdcManager, BroadcastTask broadcastTask, AdventureSettings settings) {
+    public PenaltyManager(TaskService taskService, PDCManager pdcManager, BroadcastTask broadcastTask, SettingsProvider settingsProvider) {
         this.taskService = taskService;
         this.pdcManager = pdcManager;
         this.broadcastTask = broadcastTask;
-        this.settings = settings;
+        this.settingsProvider = settingsProvider;
 
         // Lambda function to apply penalty based on broadcast task
         broadcastTask.setOnTimeUp(this::applyPenalty);
     }
 
-    public void reloadSettings(AdventureSettings settings) {
-        this.settings = settings;
-    }
-
     public void applyPenalty(String closedWorldName) {
+        AdventureSettings settings = settingsProvider.getSettings();
         String penaltyMsg = settings.getPenaltyMessage();
         String soundName = settings.getPenaltySound();
 

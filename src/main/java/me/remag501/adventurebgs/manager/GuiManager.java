@@ -4,6 +4,7 @@ import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.util.MessageUtil;
 import me.remag501.adventurebgs.util.SkullUtil;
 import me.remag501.bgscore.api.namespace.NamespaceService;
@@ -23,16 +24,17 @@ public class GuiManager {
 
     private final NamespaceService namespaceService;
     private final RotationManager rotationManager;
+    private final SettingsProvider settingsProvider;
 
-    private  AdventureSettings settings;
 
-    public GuiManager (NamespaceService namespaceService, RotationManager manager, AdventureSettings settings) {
+    public GuiManager (NamespaceService namespaceService, RotationManager manager, SettingsProvider settingsProvider) {
         this.namespaceService = namespaceService;
         this.rotationManager = manager;
-        this.settings = settings;
+        this.settingsProvider = settingsProvider;
     }
 
     public void openAdventureGUI(Player player) {
+        AdventureSettings settings = settingsProvider.getSettings();
 
         // GUI Title
         String guiTitle = MessageUtil.color(settings.getGuiTitle());
@@ -94,10 +96,6 @@ public class GuiManager {
 
         player.openInventory(gui);
 
-    }
-
-    public void reloadSettings(AdventureSettings settings) {
-        this.settings = settings;
     }
 
 

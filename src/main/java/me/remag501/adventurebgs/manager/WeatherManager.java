@@ -3,6 +3,7 @@ package me.remag501.adventurebgs.manager;
 import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.WeatherModel;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.adventurebgs.weather.BlizzardWeather;
 import me.remag501.adventurebgs.weather.WeatherEffect;
 import me.remag501.bgscore.api.task.TaskService;
@@ -21,17 +22,20 @@ public class WeatherManager {
     );
 
     private final TaskService taskService;
+    private final SettingsProvider settingsProvider;
 
     private List<WeatherModel> weathers;
 
-    public WeatherManager(TaskService taskService, AdventureSettings settings) {
+    public WeatherManager(TaskService taskService, SettingsProvider settingsProvider) {
         this.taskService = taskService;
-        weathers = settings.getWeatherModels();
+        this.settingsProvider = settingsProvider;
+
+        weathers = settingsProvider.getSettings().getWeatherModels();
         startScheduling();
     }
 
-    public void reload(AdventureSettings settings) {
-        this.weathers = settings.getWeatherModels();
+    public void reload() {
+        this.weathers = settingsProvider.getSettings().getWeatherModels();
     }
 
 

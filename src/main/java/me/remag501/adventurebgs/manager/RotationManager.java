@@ -4,6 +4,7 @@ import me.remag501.adventurebgs.AdventureBGS;
 import me.remag501.adventurebgs.setting.AdventureSettings;
 import me.remag501.adventurebgs.model.RotationTrack;
 import me.remag501.adventurebgs.model.WorldInfo;
+import me.remag501.adventurebgs.setting.SettingsProvider;
 import me.remag501.bgscore.api.task.TaskService;
 import org.bukkit.Bukkit;
 import org.bukkit.Rotation;
@@ -14,19 +15,21 @@ import java.util.*;
 public class RotationManager {
 
     private final TaskService taskService;
+    private final SettingsProvider settingsProvider;
     private final Map<String, RotationTrack> tracks = new HashMap<>();
     private final Map<String, RotationTrack> worldToTrack = new HashMap<>();
 
-    public RotationManager(TaskService taskService, AdventureSettings settings) {
+    public RotationManager(TaskService taskService, SettingsProvider settingsProvider) {
         this.taskService = taskService;
-        loadTracks(settings);
+        this.settingsProvider = settingsProvider;
+        loadTracks(settingsProvider.getSettings());
         startTicker();
     }
 
-    public void reloadSettings(AdventureSettings settings) {
+    public void reloadSettings() {
         tracks.clear();
         worldToTrack.clear();
-        loadTracks(settings);
+        loadTracks(settingsProvider.getSettings());
     }
 
     private void loadTracks(AdventureSettings settings) {
