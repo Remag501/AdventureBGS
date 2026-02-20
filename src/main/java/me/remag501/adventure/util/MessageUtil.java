@@ -1,0 +1,16 @@
+package me.remag501.adventure.util;
+
+import org.bukkit.ChatColor;
+
+public class MessageUtil {
+    public static String color(String message) {
+        return ChatColor.translateAlternateColorCodes('&', message);
+    }
+
+    public static String format(String message, String currentMap, String nextMap, long minutes) {
+        return color(message
+                .replace("%current_map%", currentMap)
+                .replace("%new_map%", nextMap)
+                .replace("%minutes%", String.valueOf(minutes)));
+    }
+}

@@ -1,6 +1,6 @@
 name: AdventureBGS
 version: '${project.version}'
-main: me.remag501.adventurebgs.AdventureBGS
+main: me.remag501.adventure.AdventurePlugin
 api-version: '1.21'
 
 commands:
