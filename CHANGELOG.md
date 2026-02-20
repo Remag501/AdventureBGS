@@ -1,3 +1,20 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [1.1.0](https://github.com/Battlegrounds-Development/adventure/compare/v1.0.0...v1.1.0) (2026-02-20)
+
+
+### Features
+
+* added /bgs adventure to plugin ([f8be78e](https://github.com/Battlegrounds-Development/adventure/commit/f8be78eafd398a487db5258684d0c0c2c0aba8de))
+* added PDCManager so players are penalized accordingly on login, and PDC matches up with world. Also fixed bug with boss bars not disappearing. ([8c4d7cc](https://github.com/Battlegrounds-Development/adventure/commit/8c4d7ccc306c0a93ba3ad75426b50d774ec2ed0f))
+
+
+### Bug Fixes
+
+* stopped task service from registering under name conflicts ([3dd5469](https://github.com/Battlegrounds-Development/adventure/commit/3dd5469c1afb8201b469099b188468b4fd2bb9a7))
+
 # 1.0.0 (2026-01-15)
 
 
